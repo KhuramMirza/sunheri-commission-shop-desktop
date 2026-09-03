@@ -20,7 +20,6 @@ win:
     - target: portable
       arch:
         - x64
-  artifactName: ${productName}-${version}-${target}.${ext}
 
 nsis:
   oneClick: false
@@ -32,6 +31,7 @@ nsis:
   shortcutName: Sunheri Commission Shop
   installerLanguages:
     - en_US
+  artifactName: ${productName}-Setup-${version}.${ext}
 
 portable:
   artifactName: ${productName}-Portable-${version}.${ext}
