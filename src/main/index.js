@@ -1,7 +1,7 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { dbService } from './db.js'
-import { printReceiptSilently } from './printer.js'
+import { printReceiptSilently, saveReceiptAsPdf } from './printer.js'
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -92,6 +92,15 @@ app.whenReady().then(() => {
       return await printReceiptSilently(htmlData)
     } catch (err) {
       console.error('Error in printer:print-receipt handler:', err)
+      return { success: false, error: err.message }
+    }
+  })
+
+  ipcMain.handle('printer:save-pdf', async (_event, { htmlData, fileName }) => {
+    try {
+      return await saveReceiptAsPdf(htmlData, fileName)
+    } catch (err) {
+      console.error('Error in printer:save-pdf handler:', err)
       return { success: false, error: err.message }
     }
   })

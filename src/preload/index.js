@@ -6,7 +6,8 @@ const api = {
   saveBill: (billData) => ipcRenderer.invoke('db:save-bill', billData),
   getBills: (query) => ipcRenderer.invoke('db:get-bills', query),
   deleteBill: (id) => ipcRenderer.invoke('db:delete-bill', id),
-  printReceipt: (htmlData) => ipcRenderer.invoke('printer:print-receipt', htmlData)
+  printReceipt: (htmlData) => ipcRenderer.invoke('printer:print-receipt', htmlData),
+  savePdf: (htmlData, fileName) => ipcRenderer.invoke('printer:save-pdf', { htmlData, fileName })
 }
 
 const electronAPI = {

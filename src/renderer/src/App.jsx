@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import ReceiptHeader from './components/ReceiptHeader'
 import BillForm from './components/BillForm'
 import LedgerTable from './components/LedgerTable'
+import ReceiptPreviewModal from './components/ReceiptPreviewModal'
 import { generateReceiptHtml } from './utils/receiptTemplate'
 
 const getTodayDateString = () => {
@@ -29,6 +30,10 @@ export default function App() {
   const [loading, setLoading] = useState(true)
   const [printStatus, setPrintStatus] = useState(null) // null | 'printing' | 'printed' | 'failed'
 
+  // Receipt Preview Modal State
+  const [previewModalOpen, setPreviewModalOpen] = useState(false)
+  const [previewBill, setPreviewBill] = useState(null)
+
   // Fetch Next Serial Number from database
   const fetchNextSerialNo = useCallback(async () => {
     try {
@@ -36,7 +41,6 @@ export default function App() {
         const nextNo = await window.api.getNextSerialNo()
         setFormData((prev) => ({ ...prev, serialNo: String(nextNo) }))
       } else {
-        // Fallback for browser testing
         const stored = JSON.parse(localStorage.getItem('mandi_bills') || '[]')
         const highest = stored.length > 0 ? Math.max(...stored.map((b) => b.serialNo || 0)) : 0
         setFormData((prev) => ({ ...prev, serialNo: String(highest + 1) }))
@@ -54,7 +58,6 @@ export default function App() {
         const bills = await window.api.getBills()
         setTransactions(bills || [])
       } else {
-        // Fallback for browser testing
         const stored = JSON.parse(localStorage.getItem('mandi_bills') || '[]')
         setTransactions(stored)
       }
@@ -71,12 +74,7 @@ export default function App() {
     fetchNextSerialNo()
   }, [fetchBills, fetchNextSerialNo])
 
-  // Mathematical Calculations:
-  // 1. Net Weight = saafi_weight - bardana_weight - kanda_weight
-  // 2. Total Manns = Math.floor(Net Weight / 40)
-  // 3. Remaining Kgs = Net Weight % 40
-  // 4. Rate per Kg = rate_per_mann / 40
-  // 5. Total Bill = (Total Manns * rate_per_mann) + (Remaining Kgs * Rate per Kg)
+  // Mathematical Calculations
   const calculations = useMemo(() => {
     const saafi = parseFloat(formData.saafiWeight) || 0
     const bardana = parseFloat(formData.bardanaWeight) || 0
@@ -116,7 +114,7 @@ export default function App() {
         window.electron.ipcRenderer.send('print-receipt', html)
         setPrintStatus('printed')
       } else {
-        console.warn('Electron IPC printer bridge not found (running in pure web browser mode).')
+        console.warn('Electron IPC printer bridge not found (pure web mode).')
         setPrintStatus('printed')
       }
     } catch (err) {
@@ -127,6 +125,33 @@ export default function App() {
     }
   }, [])
 
+  // Open Preview Modal for current form data
+  const handlePreviewCurrentForm = () => {
+    const billPreview = {
+      serialNo: parseInt(formData.serialNo, 10) || 1,
+      date: formData.date || getTodayDateString(),
+      clientName: formData.clientName ? formData.clientName.trim() : 'Cash Client (نقد گاہک)',
+      saafiWeight: parseFloat(formData.saafiWeight) || 0,
+      bardanaWeight: parseFloat(formData.bardanaWeight) || 0,
+      kandaWeight: parseFloat(formData.kandaWeight) || 0,
+      netWeight: calculations.netWeight,
+      totalManns: calculations.totalManns,
+      remainingKgs: calculations.remainingKgs,
+      ratePerMann: parseFloat(formData.ratePerMann) || 0,
+      ratePerKg: calculations.ratePerKg,
+      totalBill: calculations.totalBill
+    }
+
+    setPreviewBill(billPreview)
+    setPreviewModalOpen(true)
+  }
+
+  // Open Preview Modal for a specific saved ledger transaction
+  const handlePreviewTransaction = (transaction) => {
+    setPreviewBill(transaction)
+    setPreviewModalOpen(true)
+  }
+
   // Handle Input Changes
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -136,7 +161,7 @@ export default function App() {
     }))
   }
 
-  // Clear Form (Resets manual fields, keeps date and current serialNo)
+  // Clear Form
   const handleClearForm = () => {
     setFormData((prev) => ({
       date: prev.date || getTodayDateString(),
@@ -188,7 +213,6 @@ export default function App() {
       if (window.api && window.api.saveBill) {
         savedDoc = await window.api.saveBill(billRecord)
       } else {
-        // Fallback for browser environment
         const stored = JSON.parse(localStorage.getItem('mandi_bills') || '[]')
         savedDoc = { ...billRecord, _id: String(Date.now()), createdAt: new Date().toISOString() }
         stored.unshift(savedDoc)
@@ -240,14 +264,14 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col p-3 md:p-4 gap-3 md:gap-4 overflow-y-auto relative">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col p-4 md:p-6 gap-4 md:gap-5 overflow-y-auto relative font-sans">
       {/* Silent Print Toast Notification */}
       {printStatus && (
-        <div className="fixed top-4 right-4 z-50 animate-bounce">
+        <div className="fixed top-5 right-5 z-50 animate-bounce">
           <div
-            className={`px-4 py-2.5 rounded-xl shadow-2xl border flex items-center gap-2 text-xs font-bold ${
+            className={`px-5 py-3 rounded-2xl shadow-2xl border flex items-center gap-3 text-sm font-bold ${
               printStatus === 'printing'
-                ? 'bg-amber-500/90 text-slate-950 border-amber-300'
+                ? 'bg-amber-500 text-slate-950 border-amber-300'
                 : printStatus === 'printed'
                 ? 'bg-emerald-600 text-white border-emerald-400'
                 : 'bg-rose-600 text-white border-rose-400'
@@ -255,14 +279,14 @@ export default function App() {
           >
             {printStatus === 'printing' && (
               <>
-                <span className="w-2.5 h-2.5 rounded-full bg-slate-950 animate-ping" />
+                <span className="w-3 h-3 rounded-full bg-slate-950 animate-ping" />
                 <span>Printing receipt to default printer... (پرنٹ جاری ہے)</span>
               </>
             )}
             {printStatus === 'printed' && (
               <>
-                <span>✓</span>
-                <span>Receipt sent silently to printer! (رسید کامیابی سے پرنٹ ہو گئی)</span>
+                <span className="text-base">✓</span>
+                <span>Receipt sent silently to printer! (رسید پرنٹ ہو گئی)</span>
               </>
             )}
             {printStatus === 'failed' && (
@@ -275,24 +299,34 @@ export default function App() {
         </div>
       )}
 
-      {/* 1. Header Section: Shop Details & Receipt Style Branding */}
+      {/* 1. Header Section */}
       <ReceiptHeader />
 
-      {/* 2. Middle Form Section: Bill Inputs, Auto-Math calculations & Action Buttons */}
+      {/* 2. Middle Form Section with Preview and Print actions */}
       <BillForm
         formData={formData}
         calculations={calculations}
         onInputChange={handleInputChange}
         onClearForm={handleClearForm}
         onGenerateAndPrint={handleGenerateAndPrint}
+        onPreviewReceipt={handlePreviewCurrentForm}
       />
 
-      {/* 3. Bottom Section: Daily Transaction Ledger connected to NeDB with reprint capability */}
+      {/* 3. Bottom Section: Daily Transaction Ledger with on-screen Preview support */}
       <LedgerTable
         transactions={transactions}
         loading={loading}
         onDeleteTransaction={handleDeleteTransaction}
         onReprintTransaction={handlePrintReceipt}
+        onPreviewTransaction={handlePreviewTransaction}
+      />
+
+      {/* 4. On-Screen Receipt Preview & PDF Export Modal */}
+      <ReceiptPreviewModal
+        bill={previewBill}
+        isOpen={previewModalOpen}
+        onClose={() => setPreviewModalOpen(false)}
+        onPrint={handlePrintReceipt}
       />
     </div>
   )
