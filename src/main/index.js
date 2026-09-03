@@ -1,6 +1,7 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { dbService } from './db.js'
+import { printReceiptSilently } from './printer.js'
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -80,6 +81,16 @@ app.whenReady().then(() => {
     } catch (err) {
       console.error('Error deleting bill:', err)
       throw err
+    }
+  })
+
+  // Silent Thermal Printer IPC Handler
+  ipcMain.handle('printer:print-receipt', async (_event, htmlData) => {
+    try {
+      return await printReceiptSilently(htmlData)
+    } catch (err) {
+      console.error('Error in printer:print-receipt handler:', err)
+      return { success: false, error: err.message }
     }
   })
 

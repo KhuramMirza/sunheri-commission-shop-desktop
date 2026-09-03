@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import ReceiptHeader from './components/ReceiptHeader'
 import BillForm from './components/BillForm'
 import LedgerTable from './components/LedgerTable'
+import { generateReceiptHtml } from './utils/receiptTemplate'
 
 const getTodayDateString = () => {
   const today = new Date()
@@ -26,6 +27,7 @@ export default function App() {
   // State for historical transactions list
   const [transactions, setTransactions] = useState([])
   const [loading, setLoading] = useState(true)
+  const [printStatus, setPrintStatus] = useState(null) // null | 'printing' | 'printed' | 'failed'
 
   // Fetch Next Serial Number from database
   const fetchNextSerialNo = useCallback(async () => {
@@ -96,6 +98,40 @@ export default function App() {
     }
   }, [formData.saafiWeight, formData.bardanaWeight, formData.kandaWeight, formData.ratePerMann])
 
+  // Silent Print Execution Handler
+  const handlePrintReceipt = useCallback(async (bill) => {
+    const html = generateReceiptHtml(bill)
+    setPrintStatus('printing')
+
+    try {
+      if (window.api && window.api.printReceipt) {
+        const res = await window.api.printReceipt(html)
+        if (res && res.success === false) {
+          console.warn('Printer silent call returned status:', res.error)
+          setPrintStatus('failed')
+        } else {
+          setPrintStatus('printed')
+        }
+      } else {
+        // Fallback for browser (opens native print window without crashing)
+        const printWin = window.open('', '_blank', 'width=380,height=600')
+        if (printWin) {
+          printWin.document.write(html)
+          printWin.document.close()
+          printWin.focus()
+          printWin.print()
+          printWin.close()
+        }
+        setPrintStatus('printed')
+      }
+    } catch (err) {
+      console.error('Silent print failed:', err)
+      setPrintStatus('failed')
+    } finally {
+      setTimeout(() => setPrintStatus(null), 3500)
+    }
+  }, [])
+
   // Handle Input Changes
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -149,15 +185,19 @@ export default function App() {
     }
 
     try {
+      let savedDoc = null
       if (window.api && window.api.saveBill) {
-        await window.api.saveBill(billRecord)
+        savedDoc = await window.api.saveBill(billRecord)
       } else {
         // Fallback for browser environment
         const stored = JSON.parse(localStorage.getItem('mandi_bills') || '[]')
-        const newDoc = { ...billRecord, _id: String(Date.now()), createdAt: new Date().toISOString() }
-        stored.unshift(newDoc)
+        savedDoc = { ...billRecord, _id: String(Date.now()), createdAt: new Date().toISOString() }
+        stored.unshift(savedDoc)
         localStorage.setItem('mandi_bills', JSON.stringify(stored))
       }
+
+      // Trigger Silent Thermal Print to system default printer
+      await handlePrintReceipt(savedDoc || billRecord)
 
       // Automatically re-fetch database records and update next serial number
       await fetchBills()
@@ -173,8 +213,8 @@ export default function App() {
         ratePerMann: ''
       }))
     } catch (err) {
-      console.error('Failed to save bill to database:', err)
-      alert('خرابی: بل ڈیٹا بیس میں محفوظ نہیں ہو سکا۔ (Error saving bill to database)')
+      console.error('Failed to process and print bill:', err)
+      alert('خرابی: بل محفوظ یا پرنٹ نہیں ہو سکا۔ (Error processing bill)')
     }
   }
 
@@ -201,7 +241,41 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col p-3 md:p-4 gap-3 md:gap-4 overflow-y-auto">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col p-3 md:p-4 gap-3 md:gap-4 overflow-y-auto relative">
+      {/* Silent Print Toast Notification */}
+      {printStatus && (
+        <div className="fixed top-4 right-4 z-50 animate-bounce">
+          <div
+            className={`px-4 py-2.5 rounded-xl shadow-2xl border flex items-center gap-2 text-xs font-bold ${
+              printStatus === 'printing'
+                ? 'bg-amber-500/90 text-slate-950 border-amber-300'
+                : printStatus === 'printed'
+                ? 'bg-emerald-600 text-white border-emerald-400'
+                : 'bg-rose-600 text-white border-rose-400'
+            }`}
+          >
+            {printStatus === 'printing' && (
+              <>
+                <span className="w-2.5 h-2.5 rounded-full bg-slate-950 animate-ping" />
+                <span>Printing receipt to default printer... (پرنٹ جاری ہے)</span>
+              </>
+            )}
+            {printStatus === 'printed' && (
+              <>
+                <span>✓</span>
+                <span>Receipt sent silently to printer! (رسید کامیابی سے پرنٹ ہو گئی)</span>
+              </>
+            )}
+            {printStatus === 'failed' && (
+              <>
+                <span>⚠</span>
+                <span>Printer offline or not found. Check default printer settings.</span>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* 1. Header Section: Shop Details & Receipt Style Branding */}
       <ReceiptHeader />
 
@@ -214,11 +288,12 @@ export default function App() {
         onGenerateAndPrint={handleGenerateAndPrint}
       />
 
-      {/* 3. Bottom Section: Daily Transaction Ledger connected to NeDB */}
+      {/* 3. Bottom Section: Daily Transaction Ledger connected to NeDB with reprint capability */}
       <LedgerTable
         transactions={transactions}
         loading={loading}
         onDeleteTransaction={handleDeleteTransaction}
+        onReprintTransaction={handlePrintReceipt}
       />
     </div>
   )
