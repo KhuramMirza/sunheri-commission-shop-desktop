@@ -1,0 +1,29 @@
+{
+  "name": "mandi-commission-shop",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Offline Desktop App for Mandi Commission Shop (Sunheri Commission Shop)",
+  "main": "./out/main/index.js",
+  "author": "Mandi Commission Shop",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.16.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwind-merge": "^3.5.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "electron": "^33.2.1",
+    "electron-vite": "^2.3.0",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "vite": "^5.4.11"
+  }
+}
