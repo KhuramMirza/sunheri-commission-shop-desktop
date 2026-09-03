@@ -1,5 +1,6 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
+import { dbService } from './db.js'
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -36,12 +37,49 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  // Setup IPC handler for testing connectivity and future extensibility
+  // App health & info
   ipcMain.handle('app:ping', async () => {
     return {
       status: 'online',
       version: app.getVersion(),
       time: new Date().toISOString()
+    }
+  })
+
+  // Database IPC Handlers
+  ipcMain.handle('db:get-next-serial-no', async () => {
+    try {
+      return await dbService.getNextSerialNo()
+    } catch (err) {
+      console.error('Error fetching next serial number:', err)
+      return 1
+    }
+  })
+
+  ipcMain.handle('db:save-bill', async (_event, billData) => {
+    try {
+      return await dbService.saveBill(billData)
+    } catch (err) {
+      console.error('Error saving bill:', err)
+      throw err
+    }
+  })
+
+  ipcMain.handle('db:get-bills', async (_event, query) => {
+    try {
+      return await dbService.getBills(query)
+    } catch (err) {
+      console.error('Error fetching bills:', err)
+      return []
+    }
+  })
+
+  ipcMain.handle('db:delete-bill', async (_event, id) => {
+    try {
+      return await dbService.deleteBill(id)
+    } catch (err) {
+      console.error('Error deleting bill:', err)
+      throw err
     }
   })
 

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import ReceiptHeader from './components/ReceiptHeader'
 import BillForm from './components/BillForm'
 import LedgerTable from './components/LedgerTable'
@@ -25,8 +25,51 @@ export default function App() {
 
   // State for historical transactions list
   const [transactions, setTransactions] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  // Mathematical Calculations according to Mandi Commission Shop domain rules:
+  // Fetch Next Serial Number from database
+  const fetchNextSerialNo = useCallback(async () => {
+    try {
+      if (window.api && window.api.getNextSerialNo) {
+        const nextNo = await window.api.getNextSerialNo()
+        setFormData((prev) => ({ ...prev, serialNo: String(nextNo) }))
+      } else {
+        // Fallback for browser testing
+        const stored = JSON.parse(localStorage.getItem('mandi_bills') || '[]')
+        const highest = stored.length > 0 ? Math.max(...stored.map((b) => b.serialNo || 0)) : 0
+        setFormData((prev) => ({ ...prev, serialNo: String(highest + 1) }))
+      }
+    } catch (err) {
+      console.error('Error fetching next serial number:', err)
+    }
+  }, [])
+
+  // Fetch all saved bills from database
+  const fetchBills = useCallback(async () => {
+    setLoading(true)
+    try {
+      if (window.api && window.api.getBills) {
+        const bills = await window.api.getBills()
+        setTransactions(bills || [])
+      } else {
+        // Fallback for browser testing
+        const stored = JSON.parse(localStorage.getItem('mandi_bills') || '[]')
+        setTransactions(stored)
+      }
+    } catch (err) {
+      console.error('Error loading bills from database:', err)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  // Initial load on mount
+  useEffect(() => {
+    fetchBills()
+    fetchNextSerialNo()
+  }, [fetchBills, fetchNextSerialNo])
+
+  // Mathematical Calculations:
   // 1. Net Weight = saafi_weight - bardana_weight - kanda_weight
   // 2. Total Manns = Math.floor(Net Weight / 40)
   // 3. Remaining Kgs = Net Weight % 40
@@ -40,7 +83,6 @@ export default function App() {
 
     const netWeight = Math.max(0, saafi - bardana - kanda)
     const totalManns = Math.floor(netWeight / 40)
-    // Handle floating-point precision cleanly up to 2 decimals
     const remainingKgs = Math.round((netWeight % 40) * 100) / 100
     const ratePerKg = rate > 0 ? rate / 40 : 0
     const totalBill = (totalManns * rate) + (remainingKgs * ratePerKg)
@@ -63,7 +105,7 @@ export default function App() {
     }))
   }
 
-  // Clear Form (Resets manual fields, keeps date and serialNo)
+  // Clear Form (Resets manual fields, keeps date and current serialNo)
   const handleClearForm = () => {
     setFormData((prev) => ({
       date: prev.date || getTodayDateString(),
@@ -76,18 +118,25 @@ export default function App() {
     }))
   }
 
-  // Generate & Print handler
-  const handleGenerateAndPrint = () => {
-    if (!formData.clientName && !formData.saafiWeight && !formData.ratePerMann) {
-      alert('براہ کرم گاہک کا نام اور وزن درج کریں۔ (Please enter client details and weight)')
+  // Generate & Print / Save to NeDB Database Handler
+  const handleGenerateAndPrint = async () => {
+    const saafi = parseFloat(formData.saafiWeight)
+    const rate = parseFloat(formData.ratePerMann)
+
+    if (isNaN(saafi) || saafi <= 0) {
+      alert('براہ کرم صافی وزن درج کریں۔ (Please enter valid Saafi Gross Weight)')
       return
     }
 
-    const newTransaction = {
-      id: Date.now(),
-      date: formData.date,
-      serialNo: formData.serialNo,
-      clientName: formData.clientName || 'Cash Client (نقد گاہک)',
+    if (isNaN(rate) || rate <= 0) {
+      alert('براہ کرم ریٹ فی من درج کریں۔ (Please enter valid Rate per Mann)')
+      return
+    }
+
+    const billRecord = {
+      serialNo: parseInt(formData.serialNo, 10) || 1,
+      date: formData.date || getTodayDateString(),
+      clientName: formData.clientName ? formData.clientName.trim() : 'Cash Client (نقد گاہک)',
       saafiWeight: parseFloat(formData.saafiWeight) || 0,
       bardanaWeight: parseFloat(formData.bardanaWeight) || 0,
       kandaWeight: parseFloat(formData.kandaWeight) || 0,
@@ -95,21 +144,60 @@ export default function App() {
       totalManns: calculations.totalManns,
       remainingKgs: calculations.remainingKgs,
       ratePerMann: parseFloat(formData.ratePerMann) || 0,
+      ratePerKg: calculations.ratePerKg,
       totalBill: calculations.totalBill
     }
 
-    setTransactions((prev) => [newTransaction, ...prev])
+    try {
+      if (window.api && window.api.saveBill) {
+        await window.api.saveBill(billRecord)
+      } else {
+        // Fallback for browser environment
+        const stored = JSON.parse(localStorage.getItem('mandi_bills') || '[]')
+        const newDoc = { ...billRecord, _id: String(Date.now()), createdAt: new Date().toISOString() }
+        stored.unshift(newDoc)
+        localStorage.setItem('mandi_bills', JSON.stringify(stored))
+      }
 
-    // Update serial number for next transaction
-    setFormData((prev) => ({
-      ...prev,
-      serialNo: String(parseInt(prev.serialNo || '1', 10) + 1),
-      clientName: '',
-      saafiWeight: '',
-      bardanaWeight: '',
-      kandaWeight: '',
-      ratePerMann: ''
-    }))
+      // Automatically re-fetch database records and update next serial number
+      await fetchBills()
+      await fetchNextSerialNo()
+
+      // Reset manual fields
+      setFormData((prev) => ({
+        ...prev,
+        clientName: '',
+        saafiWeight: '',
+        bardanaWeight: '',
+        kandaWeight: '',
+        ratePerMann: ''
+      }))
+    } catch (err) {
+      console.error('Failed to save bill to database:', err)
+      alert('خرابی: بل ڈیٹا بیس میں محفوظ نہیں ہو سکا۔ (Error saving bill to database)')
+    }
+  }
+
+  // Delete transaction handler
+  const handleDeleteTransaction = async (id) => {
+    if (!window.confirm('کیا آپ واقعی یہ بل حذف کرنا چاہتے ہیں؟ (Are you sure you want to delete this bill?)')) {
+      return
+    }
+
+    try {
+      if (window.api && window.api.deleteBill) {
+        await window.api.deleteBill(id)
+      } else {
+        const stored = JSON.parse(localStorage.getItem('mandi_bills') || '[]')
+        const updated = stored.filter((b) => (b._id || b.id) !== id)
+        localStorage.setItem('mandi_bills', JSON.stringify(updated))
+      }
+
+      await fetchBills()
+      await fetchNextSerialNo()
+    } catch (err) {
+      console.error('Failed to delete transaction:', err)
+    }
   }
 
   return (
@@ -126,8 +214,12 @@ export default function App() {
         onGenerateAndPrint={handleGenerateAndPrint}
       />
 
-      {/* 3. Bottom Section: Daily Transaction Ledger */}
-      <LedgerTable transactions={transactions} />
+      {/* 3. Bottom Section: Daily Transaction Ledger connected to NeDB */}
+      <LedgerTable
+        transactions={transactions}
+        loading={loading}
+        onDeleteTransaction={handleDeleteTransaction}
+      />
     </div>
   )
 }

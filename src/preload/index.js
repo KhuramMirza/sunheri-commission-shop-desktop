@@ -1,12 +1,12 @@
 import { contextBridge, ipcRenderer } from 'electron'
 
-// Custom APIs for renderer
 const api = {
   ping: () => ipcRenderer.invoke('app:ping'),
-  // Bridge placeholders ready for DB operations and Silent Printing
-  printReceipt: (htmlData) => ipcRenderer.invoke('printer:print-receipt', htmlData),
+  getNextSerialNo: () => ipcRenderer.invoke('db:get-next-serial-no'),
   saveBill: (billData) => ipcRenderer.invoke('db:save-bill', billData),
-  getBills: (query) => ipcRenderer.invoke('db:get-bills', query)
+  getBills: (query) => ipcRenderer.invoke('db:get-bills', query),
+  deleteBill: (id) => ipcRenderer.invoke('db:delete-bill', id),
+  printReceipt: (htmlData) => ipcRenderer.invoke('printer:print-receipt', htmlData)
 }
 
 if (process.contextIsolated) {
