@@ -13,7 +13,9 @@ export async function getSystemPrinters() {
     console.error('Error fetching printers:', err)
     return []
   } finally {
-    win.close()
+    if (win && !win.isDestroyed()) {
+      win.close()
+    }
   }
 }
 
@@ -26,10 +28,32 @@ export async function printReceiptSilently(htmlContent, options = {}) {
   let printWindow = null
 
   try {
+    // Check available printers to find default
+    const printers = await getSystemPrinters()
+    const defaultPrinter = printers.find((p) => p.isDefault) || printers[0]
+    const printerName = options.deviceName || (defaultPrinter ? defaultPrinter.name : '')
+
+    // Check if target is a virtual PDF / XPS printer
+    const isVirtualPrinter =
+      printerName &&
+      (printerName.toLowerCase().includes('pdf') ||
+        printerName.toLowerCase().includes('onenote') ||
+        printerName.toLowerCase().includes('xps') ||
+        printerName.toLowerCase().includes('writer'))
+
+    // Determine if print dialog should be shown:
+    // If options.silent is explicitly false, OR if it's a virtual printer without a physical paper queue,
+    // we show the dialog so Windows can prompt for file save / printer selection.
+    const isSilent = options.silent !== undefined ? options.silent : !isVirtualPrinter
+
+    // IMPORTANT: On Windows, to show a system print dialog, the window must be visible (show: true).
+    // If silent printing to a physical printer, keep it completely hidden (show: false).
     printWindow = new BrowserWindow({
-      show: false,
-      width: 800,
-      height: 600,
+      show: !isSilent,
+      width: 850,
+      height: 650,
+      title: 'Print Receipt - Sunheri Commission Shop',
+      autoHideMenuBar: true,
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
@@ -37,33 +61,13 @@ export async function printReceiptSilently(htmlContent, options = {}) {
       }
     })
 
-    // Fetch available printers and find default
-    const printers = await printWindow.webContents.getPrintersAsync()
-    const defaultPrinter = printers.find((p) => p.isDefault) || printers[0]
-    const printerName = options.deviceName || (defaultPrinter ? defaultPrinter.name : '')
-
-    // Check if the target is a virtual PDF / OneNote printer
-    const isVirtualPdfPrinter =
-      printerName &&
-      (printerName.toLowerCase().includes('pdf') ||
-        printerName.toLowerCase().includes('onenote') ||
-        printerName.toLowerCase().includes('xps') ||
-        printerName.toLowerCase().includes('writer'))
-
-    console.log(`Targeting printer: "${printerName}" (isVirtualPdf: ${isVirtualPdfPrinter}, isDefault: ${defaultPrinter?.isDefault})`)
-
     const encodedHtml = encodeURIComponent(htmlContent)
     await printWindow.loadURL(`data:text/html;charset=utf-8,${encodedHtml}`)
 
     return new Promise((resolve) => {
-      // Determine silent mode:
-      // If it's a virtual PDF printer and user requested silent, virtual printers cannot prompt for file in silent mode,
-      // so we allow silent: false (or native save) so the Windows Save dialog pops up!
-      const shouldBeSilent = options.silent !== undefined ? options.silent : !isVirtualPdfPrinter
-
       printWindow.webContents.print(
         {
-          silent: shouldBeSilent,
+          silent: isSilent,
           printBackground: true,
           landscape: true,
           pageSize: 'A5',
@@ -74,15 +78,15 @@ export async function printReceiptSilently(htmlContent, options = {}) {
           ...options
         },
         (success, failureReason) => {
-          console.log(`Print job result: success=${success}, reason=${failureReason}`)
+          console.log(`Print job dispatched: success=${success}, reason=${failureReason}`)
 
-          // Give Windows Print Spooler 1 second before destroying offscreen window
+          // Keep window open briefly for spooler dispatch before closing
           setTimeout(() => {
             if (printWindow && !printWindow.isDestroyed()) {
               printWindow.close()
               printWindow = null
             }
-          }, 1000)
+          }, isSilent ? 1000 : 300)
 
           if (!success) {
             resolve({ success: false, error: failureReason, printerName })
