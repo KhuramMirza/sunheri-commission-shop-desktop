@@ -1,86 +1,133 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useMemo } from 'react'
+import ReceiptHeader from './components/ReceiptHeader'
+import BillForm from './components/BillForm'
+import LedgerTable from './components/LedgerTable'
+
+const getTodayDateString = () => {
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = String(today.getMonth() + 1).padStart(2, '0')
+  const day = String(today.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
 
 export default function App() {
-  const [ipcStatus, setIpcStatus] = useState('checking')
+  // Form input state
+  const [formData, setFormData] = useState({
+    date: getTodayDateString(),
+    serialNo: '1',
+    clientName: '',
+    saafiWeight: '',
+    bardanaWeight: '',
+    kandaWeight: '',
+    ratePerMann: ''
+  })
 
-  useEffect(() => {
-    if (window.api && window.api.ping) {
-      window.api
-        .ping()
-        .then(() => setIpcStatus('connected'))
-        .catch(() => setIpcStatus('disconnected'))
-    } else {
-      setIpcStatus('web-fallback')
+  // State for historical transactions list
+  const [transactions, setTransactions] = useState([])
+
+  // Mathematical Calculations according to Mandi Commission Shop domain rules:
+  // 1. Net Weight = saafi_weight - bardana_weight - kanda_weight
+  // 2. Total Manns = Math.floor(Net Weight / 40)
+  // 3. Remaining Kgs = Net Weight % 40
+  // 4. Rate per Kg = rate_per_mann / 40
+  // 5. Total Bill = (Total Manns * rate_per_mann) + (Remaining Kgs * Rate per Kg)
+  const calculations = useMemo(() => {
+    const saafi = parseFloat(formData.saafiWeight) || 0
+    const bardana = parseFloat(formData.bardanaWeight) || 0
+    const kanda = parseFloat(formData.kandaWeight) || 0
+    const rate = parseFloat(formData.ratePerMann) || 0
+
+    const netWeight = Math.max(0, saafi - bardana - kanda)
+    const totalManns = Math.floor(netWeight / 40)
+    // Handle floating-point precision cleanly up to 2 decimals
+    const remainingKgs = Math.round((netWeight % 40) * 100) / 100
+    const ratePerKg = rate > 0 ? rate / 40 : 0
+    const totalBill = (totalManns * rate) + (remainingKgs * ratePerKg)
+
+    return {
+      netWeight,
+      totalManns,
+      remainingKgs,
+      ratePerKg,
+      totalBill
     }
-  }, [])
+  }, [formData.saafiWeight, formData.bardanaWeight, formData.kandaWeight, formData.ratePerMann])
+
+  // Handle Input Changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  // Clear Form (Resets manual fields, keeps date and serialNo)
+  const handleClearForm = () => {
+    setFormData((prev) => ({
+      date: prev.date || getTodayDateString(),
+      serialNo: prev.serialNo,
+      clientName: '',
+      saafiWeight: '',
+      bardanaWeight: '',
+      kandaWeight: '',
+      ratePerMann: ''
+    }))
+  }
+
+  // Generate & Print handler
+  const handleGenerateAndPrint = () => {
+    if (!formData.clientName && !formData.saafiWeight && !formData.ratePerMann) {
+      alert('براہ کرم گاہک کا نام اور وزن درج کریں۔ (Please enter client details and weight)')
+      return
+    }
+
+    const newTransaction = {
+      id: Date.now(),
+      date: formData.date,
+      serialNo: formData.serialNo,
+      clientName: formData.clientName || 'Cash Client (نقد گاہک)',
+      saafiWeight: parseFloat(formData.saafiWeight) || 0,
+      bardanaWeight: parseFloat(formData.bardanaWeight) || 0,
+      kandaWeight: parseFloat(formData.kandaWeight) || 0,
+      netWeight: calculations.netWeight,
+      totalManns: calculations.totalManns,
+      remainingKgs: calculations.remainingKgs,
+      ratePerMann: parseFloat(formData.ratePerMann) || 0,
+      totalBill: calculations.totalBill
+    }
+
+    setTransactions((prev) => [newTransaction, ...prev])
+
+    // Update serial number for next transaction
+    setFormData((prev) => ({
+      ...prev,
+      serialNo: String(parseInt(prev.serialNo || '1', 10) + 1),
+      clientName: '',
+      saafiWeight: '',
+      bardanaWeight: '',
+      kandaWeight: '',
+      ratePerMann: ''
+    }))
+  }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-      {/* Top Header */}
-      <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur px-6 py-4 flex items-center justify-between shadow-lg">
-        <div className="flex items-center gap-4">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center font-bold text-slate-950 text-xl shadow-md">
-            غ
-          </div>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-              Mandi App Running
-              <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-medium">
-                Ready
-              </span>
-            </h1>
-            <p className="text-xs text-slate-400 font-urdu">
-              سنہری کمیشن شاپ — غلہ منڈی ملکہ ہانس
-            </p>
-          </div>
-        </div>
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col p-3 md:p-4 gap-3 md:gap-4 overflow-y-auto">
+      {/* 1. Header Section: Shop Details & Receipt Style Branding */}
+      <ReceiptHeader />
 
-        <div className="flex items-center gap-3 text-xs">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/60">
-            <span className="text-slate-400">IPC Bridge:</span>
-            <span
-              className={`font-semibold ${
-                ipcStatus === 'connected'
-                  ? 'text-emerald-400'
-                  : ipcStatus === 'checking'
-                  ? 'text-amber-400'
-                  : 'text-slate-400'
-              }`}
-            >
-              {ipcStatus.toUpperCase()}
-            </span>
-          </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/60">
-            <span className="text-slate-400">Environment:</span>
-            <span className="font-semibold text-amber-400">Electron + React + Tailwind</span>
-          </div>
-        </div>
-      </header>
+      {/* 2. Middle Form Section: Bill Inputs, Auto-Math calculations & Action Buttons */}
+      <BillForm
+        formData={formData}
+        calculations={calculations}
+        onInputChange={handleInputChange}
+        onClearForm={handleClearForm}
+        onGenerateAndPrint={handleGenerateAndPrint}
+      />
 
-      {/* Main Content Area Placeholder */}
-      <main className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-        <div className="max-w-md p-8 rounded-2xl border border-slate-800 bg-slate-900/50 shadow-2xl space-y-4">
-          <div className="inline-flex p-3 rounded-full bg-amber-500/10 text-amber-400 mb-2">
-            <svg
-              className="w-8 h-8"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-          </div>
-          <h2 className="text-2xl font-bold text-white">Setup Successful</h2>
-          <p className="text-sm text-slate-400">
-            Electron, React (JavaScript), and Tailwind CSS are fully configured. IPC bridges are ready for database storage and thermal printer integration.
-          </p>
-        </div>
-      </main>
+      {/* 3. Bottom Section: Daily Transaction Ledger */}
+      <LedgerTable transactions={transactions} />
     </div>
   )
 }
