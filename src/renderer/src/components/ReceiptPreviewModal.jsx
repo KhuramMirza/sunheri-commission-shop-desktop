@@ -44,11 +44,32 @@ export default function ReceiptPreviewModal({ bill, isOpen, onClose, onPrint }) 
           setTimeout(() => setPdfSuccess(false), 3000)
         }
       } else {
-        alert('PDF saving is supported in the desktop app window.')
+        // Browser fallback: create a hidden iframe and trigger native Print to PDF
+        const iframe = document.createElement('iframe')
+        iframe.style.position = 'fixed'
+        iframe.style.right = '0'
+        iframe.style.bottom = '0'
+        iframe.style.width = '0'
+        iframe.style.height = '0'
+        iframe.style.border = '0'
+        document.body.appendChild(iframe)
+
+        const doc = iframe.contentWindow.document
+        doc.open()
+        doc.write(html)
+        doc.close()
+
+        iframe.contentWindow.focus()
+        setTimeout(() => {
+          iframe.contentWindow.print()
+          setTimeout(() => document.body.removeChild(iframe), 2000)
+        }, 300)
+
+        setPdfSuccess(true)
+        setTimeout(() => setPdfSuccess(false), 3000)
       }
     } catch (err) {
       console.error('Error saving PDF:', err)
-      alert('Error saving PDF file.')
     } finally {
       setSavingPdf(false)
     }
