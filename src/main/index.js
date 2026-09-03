@@ -1,7 +1,7 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { dbService } from './db.js'
-import { printReceiptSilently, saveReceiptAsPdf } from './printer.js'
+import { printReceiptSilently, saveReceiptAsPdf, getSystemPrinters } from './printer.js'
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -86,10 +86,21 @@ app.whenReady().then(() => {
     }
   })
 
-  // Silent Thermal Printer IPC Handlers
-  ipcMain.handle('printer:print-receipt', async (_event, htmlData) => {
+  // Thermal Printer IPC Handlers
+  ipcMain.handle('printer:get-printers', async () => {
     try {
-      return await printReceiptSilently(htmlData)
+      return await getSystemPrinters()
+    } catch (err) {
+      console.error('Error fetching printers in main process:', err)
+      return []
+    }
+  })
+
+  ipcMain.handle('printer:print-receipt', async (_event, data) => {
+    try {
+      const htmlData = typeof data === 'string' ? data : data?.htmlData
+      const options = typeof data === 'object' ? data?.options || {} : {}
+      return await printReceiptSilently(htmlData, options)
     } catch (err) {
       console.error('Error in printer:print-receipt handler:', err)
       return { success: false, error: err.message }

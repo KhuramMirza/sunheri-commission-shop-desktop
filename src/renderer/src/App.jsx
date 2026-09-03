@@ -96,16 +96,16 @@ export default function App() {
     }
   }, [formData.saafiWeight, formData.bardanaWeight, formData.kandaWeight, formData.ratePerMann])
 
-  // Silent Print Execution Handler via Electron IPC Bridge
-  const handlePrintReceipt = useCallback(async (bill) => {
+  // Print Execution Handler via Electron IPC Bridge
+  const handlePrintReceipt = useCallback(async (bill, options = {}) => {
     const html = generateReceiptHtml(bill)
     setPrintStatus('printing')
 
     try {
       if (window.api && window.api.printReceipt) {
-        const res = await window.api.printReceipt(html)
+        const res = await window.api.printReceipt(html, options)
         if (res && res.success === false) {
-          console.warn('Printer silent call returned status:', res.error)
+          console.warn('Printer call returned status:', res.error)
           setPrintStatus('failed')
         } else {
           setPrintStatus('printed')
@@ -118,7 +118,7 @@ export default function App() {
         setPrintStatus('printed')
       }
     } catch (err) {
-      console.error('Silent print failed:', err)
+      console.error('Print failed:', err)
       setPrintStatus('failed')
     } finally {
       setTimeout(() => setPrintStatus(null), 3500)

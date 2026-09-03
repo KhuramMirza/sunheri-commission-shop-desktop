@@ -274,21 +274,33 @@ export default function ReceiptPreviewModal({ bill, isOpen, onClose, onPrint }) 
               type="button"
               onClick={handleSavePdf}
               disabled={savingPdf}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs transition cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs transition cursor-pointer"
             >
               <Download className="w-4 h-4 text-cyan-400" />
-              <span>{savingPdf ? 'Saving...' : 'Save as PDF (A5 Landscape)'}</span>
+              <span>{savingPdf ? 'Saving...' : 'Save PDF'}</span>
             </button>
 
             {onPrint && (
-              <button
-                type="button"
-                onClick={() => onPrint(bill)}
-                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition shadow-lg cursor-pointer"
-              >
-                <Printer className="w-4 h-4" />
-                <span>Send to Printer (A5 Landscape)</span>
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={() => onPrint(bill, { silent: false })}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-cyan-300 font-bold text-xs transition cursor-pointer border border-cyan-500/30"
+                  title="Opens Windows printer selection dialog"
+                >
+                  <Printer className="w-4 h-4 text-cyan-400" />
+                  <span>Print (Dialog)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => onPrint(bill, { silent: true })}
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition shadow-lg cursor-pointer"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>Silent Print (A5)</span>
+                </button>
+              </>
             )}
 
             <button

@@ -2,70 +2,103 @@ import { BrowserWindow, dialog } from 'electron'
 import fs from 'fs'
 
 /**
- * Silently print A5 landscape receipt using a hidden Electron BrowserWindow
+ * Get all available system printers
+ */
+export async function getSystemPrinters() {
+  let win = new BrowserWindow({ show: false, width: 100, height: 100 })
+  try {
+    const printers = await win.webContents.getPrintersAsync()
+    return printers || []
+  } catch (err) {
+    console.error('Error fetching printers:', err)
+    return []
+  } finally {
+    win.close()
+  }
+}
+
+/**
+ * Print A5 landscape receipt using Electron BrowserWindow
  * @param {string} htmlContent - Complete HTML receipt template string
  * @param {object} options - Optional printer configuration
  */
-export function printReceiptSilently(htmlContent, options = {}) {
-  return new Promise((resolve, reject) => {
-    try {
-      let printWindow = new BrowserWindow({
-        show: false,
-        width: 800,
-        height: 600,
-        webPreferences: {
-          nodeIntegration: false,
-          contextIsolation: true,
-          sandbox: true
-        }
-      })
+export async function printReceiptSilently(htmlContent, options = {}) {
+  let printWindow = null
 
-      const encodedHtml = encodeURIComponent(htmlContent)
-      printWindow.loadURL(`data:text/html;charset=utf-8,${encodedHtml}`)
+  try {
+    printWindow = new BrowserWindow({
+      show: false,
+      width: 800,
+      height: 600,
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true,
+        sandbox: true
+      }
+    })
 
-      printWindow.webContents.on('did-finish-load', () => {
-        printWindow.webContents.print(
-          {
-            silent: true,
-            printBackground: true,
-            landscape: true,
-            pageSize: 'A5',
-            deviceName: options.deviceName || '',
-            margins: {
-              marginType: 'none'
-            },
-            ...options
+    // Fetch available printers and find default
+    const printers = await printWindow.webContents.getPrintersAsync()
+    const defaultPrinter = printers.find((p) => p.isDefault) || printers[0]
+    const printerName = options.deviceName || (defaultPrinter ? defaultPrinter.name : '')
+
+    // Check if the target is a virtual PDF / OneNote printer
+    const isVirtualPdfPrinter =
+      printerName &&
+      (printerName.toLowerCase().includes('pdf') ||
+        printerName.toLowerCase().includes('onenote') ||
+        printerName.toLowerCase().includes('xps') ||
+        printerName.toLowerCase().includes('writer'))
+
+    console.log(`Targeting printer: "${printerName}" (isVirtualPdf: ${isVirtualPdfPrinter}, isDefault: ${defaultPrinter?.isDefault})`)
+
+    const encodedHtml = encodeURIComponent(htmlContent)
+    await printWindow.loadURL(`data:text/html;charset=utf-8,${encodedHtml}`)
+
+    return new Promise((resolve) => {
+      // Determine silent mode:
+      // If it's a virtual PDF printer and user requested silent, virtual printers cannot prompt for file in silent mode,
+      // so we allow silent: false (or native save) so the Windows Save dialog pops up!
+      const shouldBeSilent = options.silent !== undefined ? options.silent : !isVirtualPdfPrinter
+
+      printWindow.webContents.print(
+        {
+          silent: shouldBeSilent,
+          printBackground: true,
+          landscape: true,
+          pageSize: 'A5',
+          deviceName: printerName,
+          margins: {
+            marginType: 'none'
           },
-          (success, failureReason) => {
-            if (!success) {
-              console.warn('Silent print failed or cancelled:', failureReason)
-              resolve({ success: false, error: failureReason })
-            } else {
-              console.log('Receipt sent to default printer in A5 Landscape format.')
-              resolve({ success: true })
-            }
+          ...options
+        },
+        (success, failureReason) => {
+          console.log(`Print job result: success=${success}, reason=${failureReason}`)
 
-            if (printWindow) {
+          // Give Windows Print Spooler 1 second before destroying offscreen window
+          setTimeout(() => {
+            if (printWindow && !printWindow.isDestroyed()) {
               printWindow.close()
               printWindow = null
             }
-          }
-        )
-      })
+          }, 1000)
 
-      printWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
-        console.error('Failed to load receipt HTML in hidden print window:', errorDescription)
-        if (printWindow) {
-          printWindow.close()
-          printWindow = null
+          if (!success) {
+            resolve({ success: false, error: failureReason, printerName })
+          } else {
+            resolve({ success: true, printerName })
+          }
         }
-        reject(new Error(`Failed to load receipt HTML: ${errorDescription}`))
-      })
-    } catch (err) {
-      console.error('Error in printReceiptSilently:', err)
-      reject(err)
+      )
+    })
+  } catch (err) {
+    console.error('Error in printReceiptSilently:', err)
+    if (printWindow && !printWindow.isDestroyed()) {
+      printWindow.close()
     }
-  })
+    return { success: false, error: err.message }
+  }
 }
 
 /**
@@ -73,58 +106,49 @@ export function printReceiptSilently(htmlContent, options = {}) {
  * @param {string} htmlContent - Complete HTML receipt template string
  * @param {string} defaultFileName - Default filename for save dialog
  */
-export function saveReceiptAsPdf(htmlContent, defaultFileName = 'Mandi_Receipt.pdf') {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const { canceled, filePath } = await dialog.showSaveDialog({
-        title: 'Save Mandi Receipt as PDF (رسید پی ڈی ایف محفوظ کریں)',
-        defaultPath: defaultFileName,
-        filters: [{ name: 'PDF Document', extensions: ['pdf'] }]
-      })
+export async function saveReceiptAsPdf(htmlContent, defaultFileName = 'Mandi_Receipt.pdf') {
+  let pdfWindow = null
+  try {
+    const { canceled, filePath } = await dialog.showSaveDialog({
+      title: 'Save Mandi Receipt as PDF (رسید پی ڈی ایف محفوظ کریں)',
+      defaultPath: defaultFileName,
+      filters: [{ name: 'PDF Document', extensions: ['pdf'] }]
+    })
 
-      if (canceled || !filePath) {
-        return resolve({ success: false, canceled: true })
-      }
-
-      let pdfWindow = new BrowserWindow({
-        show: false,
-        width: 800,
-        height: 600,
-        webPreferences: {
-          nodeIntegration: false,
-          contextIsolation: true,
-          sandbox: true
-        }
-      })
-
-      const encodedHtml = encodeURIComponent(htmlContent)
-      pdfWindow.loadURL(`data:text/html;charset=utf-8,${encodedHtml}`)
-
-      pdfWindow.webContents.on('did-finish-load', async () => {
-        try {
-          // Generate PDF in A5 Landscape orientation (210mm width x 148.5mm height)
-          const pdfBuffer = await pdfWindow.webContents.printToPDF({
-            printBackground: true,
-            landscape: true,
-            pageSize: 'A5',
-            margins: { marginType: 'none' }
-          })
-
-          await fs.promises.writeFile(filePath, pdfBuffer)
-          resolve({ success: true, filePath })
-        } catch (pdfErr) {
-          console.error('Error generating PDF buffer:', pdfErr)
-          resolve({ success: false, error: pdfErr.message })
-        } finally {
-          if (pdfWindow) {
-            pdfWindow.close()
-            pdfWindow = null
-          }
-        }
-      })
-    } catch (err) {
-      console.error('Error in saveReceiptAsPdf:', err)
-      reject(err)
+    if (canceled || !filePath) {
+      return { success: false, canceled: true }
     }
-  })
+
+    pdfWindow = new BrowserWindow({
+      show: false,
+      width: 800,
+      height: 600,
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true,
+        sandbox: true
+      }
+    })
+
+    const encodedHtml = encodeURIComponent(htmlContent)
+    await pdfWindow.loadURL(`data:text/html;charset=utf-8,${encodedHtml}`)
+
+    // Generate PDF in A5 Landscape orientation (210mm x 148.5mm)
+    const pdfBuffer = await pdfWindow.webContents.printToPDF({
+      printBackground: true,
+      landscape: true,
+      pageSize: 'A5',
+      margins: { marginType: 'none' }
+    })
+
+    await fs.promises.writeFile(filePath, pdfBuffer)
+    return { success: true, filePath }
+  } catch (err) {
+    console.error('Error in saveReceiptAsPdf:', err)
+    return { success: false, error: err.message }
+  } finally {
+    if (pdfWindow && !pdfWindow.isDestroyed()) {
+      pdfWindow.close()
+    }
+  }
 }
