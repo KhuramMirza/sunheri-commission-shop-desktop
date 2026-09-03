@@ -1,9 +1,15 @@
 import Datastore from '@seald-io/nedb'
 import { app } from 'electron'
 import { join } from 'path'
+import fs from 'fs'
 
-// Initialize NeDB datastore in the user's local application data directory
-const dbPath = join(app.getPath('userData'), 'mandi_bills.db')
+// Initialize NeDB datastore in the persistent user application data directory
+const userDataDir = app.getPath('userData')
+if (!fs.existsSync(userDataDir)) {
+  fs.mkdirSync(userDataDir, { recursive: true })
+}
+
+const dbPath = join(userDataDir, 'mandi_bills.db')
 const billsDb = new Datastore({ filename: dbPath, autoload: true })
 
 // Ensure index on serialNo for fast sequential lookup

@@ -1,0 +1,37 @@
+appId: com.sunheri.mandibilling
+productName: Sunheri Commission Shop
+copyright: Copyright © 2026 Sunheri Commission Shop
+
+directories:
+  output: dist
+  buildResources: build
+
+files:
+  - out/**/*
+  - package.json
+
+asar: true
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: portable
+      arch:
+        - x64
+  artifactName: ${productName}-${version}-${target}.${ext}
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  deleteAppDataOnUninstall: false
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: Sunheri Commission Shop
+  installerLanguages:
+    - en_US
+
+portable:
+  artifactName: ${productName}-Portable-${version}.${ext}
