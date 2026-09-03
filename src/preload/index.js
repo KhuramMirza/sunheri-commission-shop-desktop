@@ -9,12 +9,21 @@ const api = {
   printReceipt: (htmlData) => ipcRenderer.invoke('printer:print-receipt', htmlData)
 }
 
+const electronAPI = {
+  ipcRenderer: {
+    send: (channel, data) => ipcRenderer.send(channel, data),
+    invoke: (channel, data) => ipcRenderer.invoke(channel, data)
+  }
+}
+
 if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('api', api)
+    contextBridge.exposeInMainWorld('electron', electronAPI)
   } catch (error) {
     console.error('Failed to expose context bridge:', error)
   }
 } else {
   window.api = api
+  window.electron = electronAPI
 }

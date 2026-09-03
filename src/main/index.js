@@ -25,7 +25,9 @@ function createWindow() {
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
+    if (details.url.startsWith('http://') || details.url.startsWith('https://')) {
+      shell.openExternal(details.url)
+    }
     return { action: 'deny' }
   })
 
@@ -84,13 +86,21 @@ app.whenReady().then(() => {
     }
   })
 
-  // Silent Thermal Printer IPC Handler
+  // Silent Thermal Printer IPC Handlers
   ipcMain.handle('printer:print-receipt', async (_event, htmlData) => {
     try {
       return await printReceiptSilently(htmlData)
     } catch (err) {
       console.error('Error in printer:print-receipt handler:', err)
       return { success: false, error: err.message }
+    }
+  })
+
+  ipcMain.on('print-receipt', async (_event, htmlData) => {
+    try {
+      await printReceiptSilently(htmlData)
+    } catch (err) {
+      console.error('Error in print-receipt on-handler:', err)
     }
   })
 

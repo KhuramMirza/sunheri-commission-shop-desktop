@@ -98,7 +98,7 @@ export default function App() {
     }
   }, [formData.saafiWeight, formData.bardanaWeight, formData.kandaWeight, formData.ratePerMann])
 
-  // Silent Print Execution Handler
+  // Silent Print Execution Handler via Electron IPC Bridge
   const handlePrintReceipt = useCallback(async (bill) => {
     const html = generateReceiptHtml(bill)
     setPrintStatus('printing')
@@ -112,16 +112,11 @@ export default function App() {
         } else {
           setPrintStatus('printed')
         }
+      } else if (window.electron && window.electron.ipcRenderer) {
+        window.electron.ipcRenderer.send('print-receipt', html)
+        setPrintStatus('printed')
       } else {
-        // Fallback for browser (opens native print window without crashing)
-        const printWin = window.open('', '_blank', 'width=380,height=600')
-        if (printWin) {
-          printWin.document.write(html)
-          printWin.document.close()
-          printWin.focus()
-          printWin.print()
-          printWin.close()
-        }
+        console.warn('Electron IPC printer bridge not found (running in pure web browser mode).')
         setPrintStatus('printed')
       }
     } catch (err) {
@@ -155,7 +150,11 @@ export default function App() {
   }
 
   // Generate & Print / Save to NeDB Database Handler
-  const handleGenerateAndPrint = async () => {
+  const handleGenerateAndPrint = async (e) => {
+    if (e && typeof e.preventDefault === 'function') {
+      e.preventDefault()
+    }
+
     const saafi = parseFloat(formData.saafiWeight)
     const rate = parseFloat(formData.ratePerMann)
 

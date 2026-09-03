@@ -279,7 +279,10 @@ export default function BillForm({
       <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-2 border-t border-slate-800">
         <button
           type="button"
-          onClick={onClearForm}
+          onClick={(e) => {
+            e.preventDefault()
+            onClearForm(e)
+          }}
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-slate-700 hover:text-white text-slate-300 font-semibold text-xs tracking-wide transition-all shadow-sm active:scale-95 cursor-pointer"
         >
           <RotateCcw className="w-4 h-4 text-slate-400" />
@@ -289,7 +292,10 @@ export default function BillForm({
 
         <button
           type="button"
-          onClick={onGenerateAndPrint}
+          onClick={(e) => {
+            e.preventDefault()
+            onGenerateAndPrint(e)
+          }}
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-slate-950 font-black text-xs tracking-wide transition-all shadow-lg hover:shadow-amber-500/20 active:scale-95 cursor-pointer"
         >
           <Printer className="w-4 h-4" />
