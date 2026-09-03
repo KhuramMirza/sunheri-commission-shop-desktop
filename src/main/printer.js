@@ -2,7 +2,7 @@ import { BrowserWindow, dialog } from 'electron'
 import fs from 'fs'
 
 /**
- * Silently print thermal receipt using a hidden Electron BrowserWindow
+ * Silently print A5 landscape receipt using a hidden Electron BrowserWindow
  * @param {string} htmlContent - Complete HTML receipt template string
  * @param {object} options - Optional printer configuration
  */
@@ -11,8 +11,8 @@ export function printReceiptSilently(htmlContent, options = {}) {
     try {
       let printWindow = new BrowserWindow({
         show: false,
-        width: 380,
-        height: 800,
+        width: 800,
+        height: 600,
         webPreferences: {
           nodeIntegration: false,
           contextIsolation: true,
@@ -28,6 +28,8 @@ export function printReceiptSilently(htmlContent, options = {}) {
           {
             silent: true,
             printBackground: true,
+            landscape: true,
+            pageSize: 'A5',
             deviceName: options.deviceName || '',
             margins: {
               marginType: 'none'
@@ -39,7 +41,7 @@ export function printReceiptSilently(htmlContent, options = {}) {
               console.warn('Silent print failed or cancelled:', failureReason)
               resolve({ success: false, error: failureReason })
             } else {
-              console.log('Receipt sent to default printer successfully.')
+              console.log('Receipt sent to default printer in A5 Landscape format.')
               resolve({ success: true })
             }
 
@@ -67,7 +69,7 @@ export function printReceiptSilently(htmlContent, options = {}) {
 }
 
 /**
- * Save thermal receipt as a PDF file
+ * Save A5 landscape receipt as a PDF file
  * @param {string} htmlContent - Complete HTML receipt template string
  * @param {string} defaultFileName - Default filename for save dialog
  */
@@ -86,8 +88,8 @@ export function saveReceiptAsPdf(htmlContent, defaultFileName = 'Mandi_Receipt.p
 
       let pdfWindow = new BrowserWindow({
         show: false,
-        width: 380,
-        height: 800,
+        width: 800,
+        height: 600,
         webPreferences: {
           nodeIntegration: false,
           contextIsolation: true,
@@ -100,13 +102,12 @@ export function saveReceiptAsPdf(htmlContent, defaultFileName = 'Mandi_Receipt.p
 
       pdfWindow.webContents.on('did-finish-load', async () => {
         try {
+          // Generate PDF in A5 Landscape orientation (210mm width x 148.5mm height)
           const pdfBuffer = await pdfWindow.webContents.printToPDF({
             printBackground: true,
-            margins: { marginType: 'none' },
-            pageSize: {
-              width: 80000, // 80mm in microns
-              height: 220000 // 220mm in microns
-            }
+            landscape: true,
+            pageSize: 'A5',
+            margins: { marginType: 'none' }
           })
 
           await fs.promises.writeFile(filePath, pdfBuffer)
