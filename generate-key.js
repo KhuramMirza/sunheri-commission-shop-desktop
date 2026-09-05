@@ -194,8 +194,15 @@ async function main() {
   console.log('---------------------------------------------------------------\n')
 }
 
-// Execute CLI when run directly
-main().catch((err) => {
-  console.error('Fatal Error:', err)
-  process.exit(1)
-})
+// Execute CLI only when run directly (not when imported)
+const isDirectCliRun =
+  process.argv[1] &&
+  (path.resolve(process.argv[1]) === path.resolve(__filename) ||
+    process.argv[1].endsWith('generate-key.js'))
+
+if (isDirectCliRun) {
+  main().catch((err) => {
+    console.error('Fatal Error:', err)
+    process.exit(1)
+  })
+}

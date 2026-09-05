@@ -2,7 +2,7 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { dbService } from './db.js'
 import { printReceiptSilently, saveReceiptAsPdf, getSystemPrinters } from './printer.js'
-import { licenseService } from './license.js'
+import { licenseService, RSA_PUBLIC_KEY } from './license.js'
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
