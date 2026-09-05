@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import {
   BookOpen,
   FileText,
@@ -8,17 +8,20 @@ import {
   TrendingUp,
   Scale,
   DollarSign,
-  Eye
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react'
 
 export default function LedgerTable({
   transactions = [],
   loading = false,
   onDeleteTransaction,
-  onReprintTransaction,
-  onPreviewTransaction
+  onPreviewTransaction,
+  resetTrigger
 }) {
   const [searchTerm, setSearchTerm] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const pageSize = 15
 
   // Filter transactions by Client Name, Serial Number, or Date
   const filteredTransactions = useMemo(() => {
@@ -31,6 +34,16 @@ export default function LedgerTable({
         (t.date && t.date.includes(query))
     )
   }, [transactions, searchTerm])
+
+  // Automatically reset to Page 1 whenever search query changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm])
+
+  // Automatically reset to Page 1 whenever a new bill is created or resetTrigger fires
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [resetTrigger, transactions.length])
 
   // Calculate Ledger Totals
   const totals = useMemo(() => {
@@ -46,6 +59,15 @@ export default function LedgerTable({
 
   const totalManns = Math.floor(totals.netWeight / 40)
   const totalRemainingKgs = Math.round((totals.netWeight % 40) * 100) / 100
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredTransactions.length / pageSize) || 1
+  const safePage = Math.min(Math.max(1, currentPage), totalPages)
+  const startIndex = (safePage - 1) * pageSize
+  const endIndex = Math.min(startIndex + pageSize, filteredTransactions.length)
+  const paginatedTransactions = useMemo(() => {
+    return filteredTransactions.slice(startIndex, endIndex)
+  }, [filteredTransactions, startIndex, endIndex])
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl p-5 md:p-6 backdrop-blur-md flex flex-col gap-4">
@@ -136,22 +158,22 @@ export default function LedgerTable({
         </div>
       </div>
 
-      {/* Table Container with spacious, readable rows */}
-      <div className="overflow-x-auto border border-slate-800 rounded-xl bg-slate-950/90 max-h-80 overflow-y-auto">
+      {/* Fixed Scrollable Container with Sticky Table Headers */}
+      <div className="overflow-x-auto border border-slate-800 rounded-xl bg-slate-950 max-h-80 md:max-h-96 overflow-y-auto relative shadow-inner">
         <table className="w-full text-left border-collapse text-xs md:text-sm">
-          <thead className="sticky top-0 z-10">
-            <tr className="bg-slate-800/95 text-slate-200 border-b border-slate-700 select-none">
-              <th className="py-3 px-3.5 font-bold text-center w-14">S.No</th>
-              <th className="py-3 px-3.5 font-bold">Date / تاریخ</th>
-              <th className="py-3 px-3.5 font-bold">Client / گاہک</th>
-              <th className="py-3 px-3.5 font-bold text-right">Saafi (Kg)</th>
-              <th className="py-3 px-3.5 font-bold text-right">Bardana</th>
-              <th className="py-3 px-3.5 font-bold text-right">Kanda</th>
-              <th className="py-3 px-3.5 font-bold text-right text-cyan-300">Net Wt</th>
-              <th className="py-3 px-3.5 font-bold text-center">Manns - Kgs</th>
-              <th className="py-3 px-3.5 font-bold text-right">Rate/Mann</th>
-              <th className="py-3 px-3.5 font-bold text-right text-emerald-400">Total Bill</th>
-              <th className="py-3 px-3.5 font-bold text-center w-28">Actions</th>
+          <thead className="sticky top-0 z-20 bg-slate-900 border-b-2 border-slate-700 select-none shadow-md">
+            <tr className="text-slate-200">
+              <th className="py-3 px-3.5 font-bold text-center w-14 bg-slate-900">S.No</th>
+              <th className="py-3 px-3.5 font-bold bg-slate-900">Date / تاریخ</th>
+              <th className="py-3 px-3.5 font-bold bg-slate-900">Client / گاہک</th>
+              <th className="py-3 px-3.5 font-bold text-right bg-slate-900">Saafi (Kg)</th>
+              <th className="py-3 px-3.5 font-bold text-right bg-slate-900">Bardana</th>
+              <th className="py-3 px-3.5 font-bold text-right bg-slate-900">Kanda</th>
+              <th className="py-3 px-3.5 font-bold text-right text-cyan-300 bg-slate-900">Net Wt</th>
+              <th className="py-3 px-3.5 font-bold text-center bg-slate-900">Manns - Kgs</th>
+              <th className="py-3 px-3.5 font-bold text-right bg-slate-900">Rate/Mann</th>
+              <th className="py-3 px-3.5 font-bold text-right text-emerald-400 bg-slate-900">Total Bill</th>
+              <th className="py-3 px-3.5 font-bold text-center w-28 bg-slate-900">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800 font-mono">
@@ -164,7 +186,7 @@ export default function LedgerTable({
                   </div>
                 </td>
               </tr>
-            ) : filteredTransactions.length === 0 ? (
+            ) : paginatedTransactions.length === 0 ? (
               <tr>
                 <td colSpan={11} className="py-12 text-center text-slate-400">
                   <div className="flex flex-col items-center justify-center gap-2">
@@ -175,13 +197,13 @@ export default function LedgerTable({
                         : 'No transactions recorded in database yet.'}
                     </p>
                     <p className="text-sm font-urdu text-slate-400">
-                      نیا بل بنائیں اور "Generate & Print Bill" پر کلک کریں
+                      نیا بل بنائیں اور "Generate Bill" پر کلک کریں
                     </p>
                   </div>
                 </td>
               </tr>
             ) : (
-              filteredTransactions.map((t, idx) => (
+              paginatedTransactions.map((t, idx) => (
                 <tr
                   key={t._id || t.id || idx}
                   className="hover:bg-slate-900 transition-colors text-slate-200"
@@ -255,8 +277,53 @@ export default function LedgerTable({
         </table>
       </div>
 
+      {/* Client-Side Pagination Controls */}
+      {filteredTransactions.length > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 text-xs text-slate-300">
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-slate-400">
+              Showing <span className="font-bold text-amber-400">{startIndex + 1}</span> to{' '}
+              <span className="font-bold text-amber-400">{endIndex}</span> of{' '}
+              <span className="font-bold text-slate-200">{filteredTransactions.length}</span> records
+            </span>
+            <span className="text-slate-600 hidden sm:inline">|</span>
+            <span className="font-urdu text-slate-400 text-xs hidden sm:inline">
+              صفحہ {safePage} از {totalPages}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={safePage <= 1}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-200 font-bold transition cursor-pointer"
+            >
+              <ChevronLeft className="w-4 h-4 text-amber-400" />
+              <span>Previous</span>
+              <span className="font-urdu text-[11px] ml-0.5">(پچھلا)</span>
+            </button>
+
+            <span className="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 font-mono font-bold text-amber-400">
+              Page {safePage} of {totalPages}
+            </span>
+
+            <button
+              type="button"
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={safePage >= totalPages}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-200 font-bold transition cursor-pointer"
+            >
+              <span>Next</span>
+              <span className="font-urdu text-[11px] mr-0.5">(اگلا)</span>
+              <ChevronRight className="w-4 h-4 text-amber-400" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Footer Info */}
-      <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
+      <div className="flex items-center justify-between text-xs text-slate-400 pt-1 border-t border-slate-800/80">
         <span className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
           Offline NeDB Storage Connected (mandi_bills.db)

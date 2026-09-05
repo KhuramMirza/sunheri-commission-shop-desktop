@@ -28,6 +28,7 @@ export default function App() {
   // State for historical transactions list
   const [transactions, setTransactions] = useState([])
   const [loading, setLoading] = useState(true)
+  const [ledgerResetTrigger, setLedgerResetTrigger] = useState(0)
 
   // Receipt Preview Modal State
   const [previewModalOpen, setPreviewModalOpen] = useState(false)
@@ -193,6 +194,9 @@ export default function App() {
       await fetchBills()
       await fetchNextSerialNo()
 
+      // Reset ledger pagination back to Page 1 so newly saved entry is immediately visible at the top
+      setLedgerResetTrigger((prev) => prev + 1)
+
       // Reset manual fields
       setFormData((prev) => ({
         ...prev,
@@ -250,12 +254,13 @@ export default function App() {
         onPreviewReceipt={handlePreviewCurrentForm}
       />
 
-      {/* 3. Bottom Section: Daily Transaction Ledger with on-screen Print/Preview support */}
+      {/* 3. Bottom Section: Daily Transaction Ledger with fixed scroll, pagination, and sticky headers */}
       <LedgerTable
         transactions={transactions}
         loading={loading}
         onDeleteTransaction={handleDeleteTransaction}
         onPreviewTransaction={handlePreviewTransaction}
+        resetTrigger={ledgerResetTrigger}
       />
 
       {/* 4. On-Screen Receipt Preview & Print Modal */}

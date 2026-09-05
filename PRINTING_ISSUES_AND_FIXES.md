@@ -137,3 +137,29 @@ This document logs the exact technical causes of these issues and the architectu
 3. **Reprinting Past Bills**:
    - In the Daily Ledger table at the bottom, find the transaction and click **"Print"**.
    - The receipt preview opens with the working "Print" button ready for printing.
+
+---
+
+## 7. Issue 4: Ledger Scaling, Sticky Headers & Client-Side Pagination
+
+### Symptoms Observed
+- As transactions accumulated in the local database, the ledger table expanded down the screen, forcing the operator to scroll the entire desktop window up and down to see the bill entry form.
+- When scrolling through rows, the table header disappeared off-screen, making it difficult to remember column headers.
+
+### Solutions Implemented
+1. **Fixed Scrollable Container**:
+   - Wrapped the ledger `<table>` in an `overflow-x-auto overflow-y-auto max-h-80 md:max-h-96 relative border border-slate-800 rounded-xl bg-slate-950 shadow-inner` container.
+   - Constrains the table height to ~320px–380px, preventing the ledger from ever stretching the window. The bill generation form remains permanently in view.
+2. **Sticky Opaque Headers**:
+   - Styled `<thead>` with `sticky top-0 z-20 bg-slate-900 border-b-2 border-slate-700 shadow-md select-none`.
+   - Each `<th>` is styled with solid `bg-slate-900` so column names remain permanently visible and completely opaque as rows scroll underneath.
+3. **Client-Side Pagination**:
+   - Paginated table rendering to 15 records per page (`pageSize = 15`).
+   - Added a pagination bar below the table with:
+     - Record range indicator: `Showing X to Y of Total records | صفحہ A از B`
+     - Compact "Previous" and "Next" buttons with Urdu translation (`پچھلا` / `اگلا`) and arrow icons.
+     - "Page X of Y" indicator.
+4. **Auto-Reset to Page 1 on New Entry**:
+   - Integrated `resetTrigger` in `App.jsx` linked to `handleGenerateBill`.
+   - Whenever a new bill is successfully saved, the pagination automatically jumps back to **Page 1**, guaranteeing the newly created bill is immediately visible at the very top of the list.
+
