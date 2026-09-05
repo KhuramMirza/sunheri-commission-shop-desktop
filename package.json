@@ -3,18 +3,19 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Offline Desktop App for Mandi Commission Shop (Sunheri Commission Shop)",
-  "main": "./out/main/index.js",
+  "main": "./out/main/entry.cjs",
   "author": "Mandi Commission Shop",
   "scripts": {
     "dev": "electron-vite dev",
-    "build": "electron-vite build",
+    "build": "electron-vite build && node compile-bytecode.js",
     "preview": "electron-vite preview",
-    "build:win": "electron-vite build && electron-builder --win",
-    "build:portable": "electron-vite build && electron-builder --win portable",
-    "build:installer": "electron-vite build && electron-builder --win nsis"
+    "build:win": "npm run build && electron-builder --win",
+    "build:portable": "npm run build && electron-builder --win portable",
+    "build:installer": "npm run build && electron-builder --win nsis"
   },
   "dependencies": {
     "@seald-io/nedb": "^4.1.2",
+    "bytenode": "^1.6.0",
     "clsx": "^2.1.1",
     "lucide-react": "^1.16.0",
     "node-machine-id": "^1.1.12",
