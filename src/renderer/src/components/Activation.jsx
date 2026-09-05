@@ -38,8 +38,8 @@ export default function Activation({ onActivated }) {
           const id = await window.api.getMachineId()
           setMachineId(id || 'HARDWARE-ID-UNAVAILABLE')
         } else {
-          // Web preview fallback
-          setMachineId('WEB-DEV-MANDI-DEMO-HWID')
+          setMachineId('DESKTOP-BRIDGE-ERROR')
+          setErrorMsg('سافٹ ویئر کا سسٹم برج لوڈ نہیں ہو سکا۔ (Desktop Bridge unavailable)')
         }
       } catch (err) {
         console.error('Failed to fetch hardware ID:', err)
@@ -101,12 +101,7 @@ export default function Activation({ onActivated }) {
           setErrorMsg(result?.message || 'غلط لائسنس کی ہے۔ (Invalid License Key)')
         }
       } else {
-        // Pure web mode fallback
-        localStorage.setItem('mandi_license', JSON.stringify({ isActivated: true, key: trimmedKey }))
-        setSuccessMsg('Software activated successfully in demo mode!')
-        setTimeout(() => {
-          if (onActivated) onActivated()
-        }, 1200)
+        setErrorMsg('سافٹ ویئر کا سسٹم برج دستیاب نہیں ہے۔ براہ کرم ایپلیکیشن دوبارہ کھولیں۔ (Desktop API Bridge unavailable)')
       }
     } catch (err) {
       console.error('Activation failed:', err)

@@ -1,10 +1,15 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
+import fs from 'fs'
 import { dbService } from './db.js'
 import { printReceiptSilently, saveReceiptAsPdf, getSystemPrinters } from './printer.js'
 import { licenseService, RSA_PUBLIC_KEY } from './license.js'
 
 function createWindow() {
+  const preloadJs = join(__dirname, '../preload/index.js')
+  const preloadMjs = join(__dirname, '../preload/index.mjs')
+  const preloadPath = fs.existsSync(preloadJs) ? preloadJs : preloadMjs
+
   const mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
@@ -14,7 +19,7 @@ function createWindow() {
     autoHideMenuBar: true,
     title: 'Sunheri Commission Shop (سنہری کمیشن شاپ)',
     webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
+      preload: preloadPath,
       sandbox: false,
       contextIsolation: true,
       nodeIntegration: false

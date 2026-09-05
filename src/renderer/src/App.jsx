@@ -40,14 +40,18 @@ export default function App() {
 
   // Check Activation Status on Mount
   useEffect(() => {
+    // Purge any stale mock/demo keys from localStorage
+    try {
+      localStorage.removeItem('mandi_license')
+    } catch (_) {}
+
     async function checkActivation() {
       try {
         if (window.api && window.api.getLicenseStatus) {
           const status = await window.api.getLicenseStatus()
           setIsActivated(Boolean(status && status.isActivated))
         } else {
-          const stored = localStorage.getItem('mandi_license')
-          setIsActivated(Boolean(stored && JSON.parse(stored)?.isActivated))
+          setIsActivated(false)
         }
       } catch (err) {
         console.error('Error verifying activation status:', err)
