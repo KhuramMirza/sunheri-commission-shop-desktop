@@ -140,7 +140,7 @@ export default function ReceiptPreviewModal({ bill, isOpen, onClose, onPrint }) 
               {/* Center: Kapas Logo Emblem + Urdu Branding & Tagline */}
               <div className="w-[38%] text-center flex flex-col items-center justify-center">
                 <div className="flex items-center justify-center mb-1">
-                  <KapasLogo size={42} />
+                  <KapasLogo size={50} />
                 </div>
                 <div
                   className="font-urdu font-black text-2xl text-slate-950 select-text"
@@ -226,10 +226,14 @@ export default function ReceiptPreviewModal({ bill, isOpen, onClose, onPrint }) 
                     <span>خالص وزن (Net Weight):</span>
                     <span className="font-mono text-base">{netWeight} Kg</span>
                   </div>
-                  <div className="flex justify-between font-bold text-xs mt-1.5">
+                  <div className="flex justify-between items-center font-bold text-xs mt-1.5">
                     <span className="font-urdu">وزن بحساب من:</span>
-                    <span className="text-sm">
-                      {totalManns} من {remainingKgs} کلو
+                    <span className="inline-flex items-center gap-1 font-bold text-sm" style={{ direction: 'ltr' }}>
+                      <span className="font-mono text-base font-black">{totalManns}</span>
+                      <span className="font-urdu text-sm">من</span>
+                      <span className="text-slate-500 font-bold mx-0.5">+</span>
+                      <span className="font-mono text-base font-black">{remainingKgs}</span>
+                      <span className="font-urdu text-sm">کلو</span>
                     </span>
                   </div>
                   <div className="flex justify-between text-[10px] text-slate-600 mt-1">
@@ -288,6 +292,22 @@ export default function ReceiptPreviewModal({ bill, isOpen, onClose, onPrint }) 
                   شکریہ! دوبارہ تشریف لائیں۔
                 </div>
                 <div className="mt-0.5">Sunheri Commission Shop • Ghalla Mandi, Malka Hans</div>
+              </div>
+            </div>
+
+            {/* POS Software Credit Bar */}
+            <div className="border-t border-black mt-2 pt-1.5 flex justify-between items-center text-[10px] text-slate-900 select-text">
+              <div>
+                <span className="font-semibold text-slate-600">POS Software: </span>
+                <span className="font-black text-slate-950">Easy Solutions</span>
+              </div>
+              <div className="flex items-center gap-1 font-bold">
+                <span className="font-urdu text-xs">رابطہ برائے کمپیوٹر سافٹ ویئر: </span>
+                <span className="font-mono text-xs font-black text-slate-950">0315-6566533</span>
+              </div>
+              <div>
+                <span className="font-semibold text-slate-600">Contact: </span>
+                <span className="font-mono font-black text-slate-950">0315-6566533</span>
               </div>
             </div>
           </div>

@@ -74,10 +74,14 @@ export default function ReceiptTemplate({ bill }) {
               <span>خالص وزن (Net Weight):</span>
               <span>{netWeight} Kg</span>
             </div>
-            <div className="flex justify-between text-xs mt-0.5">
+            <div className="flex justify-between items-center text-xs mt-0.5">
               <span>وزن بحساب من:</span>
-              <span>
-                {totalManns} من {remainingKgs} کلو
+              <span className="inline-flex items-center gap-1 font-bold text-sm" style={{ direction: 'ltr' }}>
+                <span className="font-mono text-base font-bold">{totalManns}</span>
+                <span className="font-urdu text-sm">من</span>
+                <span className="text-gray-500 font-bold mx-0.5">+</span>
+                <span className="font-mono text-base font-bold">{remainingKgs}</span>
+                <span className="font-urdu text-sm">کلو</span>
               </span>
             </div>
           </div>
@@ -111,6 +115,22 @@ export default function ReceiptTemplate({ bill }) {
         <div className="text-right text-[10px]">
           <div className="font-urdu font-bold">شکریہ! دوبارہ تشریف لائیں۔</div>
           <div>Sunheri Commission Shop</div>
+        </div>
+      </div>
+
+      {/* POS Software Credit Bar */}
+      <div className="border-t border-black mt-2 pt-1 flex justify-between items-center text-[10px] text-gray-800">
+        <div>
+          <span className="font-semibold text-gray-600">POS Software: </span>
+          <span className="font-bold text-black">Easy Solutions</span>
+        </div>
+        <div className="flex items-center gap-1 font-bold">
+          <span className="font-urdu text-xs">رابطہ برائے کمپیوٹر سافٹ ویئر: </span>
+          <span className="font-mono text-xs font-bold text-black">0315-6566533</span>
+        </div>
+        <div>
+          <span className="font-semibold text-gray-600">Contact: </span>
+          <span className="font-mono font-bold text-black">0315-6566533</span>
         </div>
       </div>
     </div>

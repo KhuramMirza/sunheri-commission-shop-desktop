@@ -39,8 +39,8 @@ export default function ReceiptHeader() {
       <div className="flex flex-col lg:flex-row items-center justify-between gap-5 pb-5 border-b border-slate-800/90">
         {/* Left Branding */}
         <div className="flex items-center gap-4 text-center lg:text-left">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600 flex items-center justify-center p-1.5 shadow-lg ring-4 ring-amber-400/20 shrink-0">
-            <KapasLogo size={44} />
+          <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center p-1 shadow-lg ring-4 ring-amber-400/30 shrink-0">
+            <KapasLogo size={48} />
           </div>
           <div>
             <div className="flex items-center gap-3 justify-center lg:justify-start">

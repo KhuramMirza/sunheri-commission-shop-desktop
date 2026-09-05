@@ -1,4 +1,4 @@
-import { KAPAS_LOGO_SVG } from './kapasLogoSvg.js'
+import { MANDI_LOGO_BASE64 } from '../assets/mandiLogoBase64.js'
 
 /**
  * Generates an optimized, self-contained HTML receipt template
@@ -117,6 +117,13 @@ export function generateReceiptHtml(bill) {
       justify-content: center;
       align-items: center;
       margin-bottom: 2px;
+    }
+    .mandi-voucher-logo {
+      width: 58px;
+      height: 58px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
     }
     .shop-title-ur {
       font-size: 22px;
@@ -323,6 +330,45 @@ export function generateReceiptHtml(bill) {
       color: #444;
       margin-top: 1px;
     }
+    .mann-display-badge {
+      display: inline-flex;
+      align-items: center;
+      direction: ltr;
+      gap: 3px;
+      font-size: 13.5px;
+    }
+    .num-bold {
+      font-family: monospace;
+      font-weight: 800;
+      font-size: 15px;
+      color: #000;
+    }
+    .plus-sep {
+      color: #555;
+      font-weight: 900;
+      margin: 0 1.5px;
+    }
+    .software-credits-bar {
+      margin-top: 4px;
+      padding-top: 2px;
+      border-top: 1px solid #000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 9px;
+      color: #000;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+    }
+    .credits-bold {
+      font-weight: 900;
+      color: #000;
+    }
+    .credits-phone {
+      font-family: monospace;
+      font-weight: 900;
+      font-size: 10px;
+      color: #000;
+    }
   </style>
 </head>
 <body>
@@ -336,10 +382,10 @@ export function generateReceiptHtml(bill) {
         <div class="location-text-ur urdu">غلہ منڈی ملکہ ہانس</div>
       </div>
 
-      <!-- Center: Kapas Logo Emblem + Urdu Title & Tagline -->
+      <!-- Center: Mandi Emblem Logo + Urdu Title & Tagline -->
       <div class="header-center">
         <div class="kapas-emblem-wrap">
-          ${KAPAS_LOGO_SVG}
+          <img src="${MANDI_LOGO_BASE64}" alt="Logo" class="mandi-voucher-logo" />
         </div>
         <span class="shop-title-ur urdu">سنہری کمیشن شاپ</span>
         <span class="tagline-ur urdu">ہر قسم کی زرعی اجناس کی خرید و فروخت کا با اعتماد ادارہ</span>
@@ -411,7 +457,13 @@ export function generateReceiptHtml(bill) {
           </div>
           <div class="net-weight-manns">
             <span class="urdu">وزن بحساب من:</span>
-            <span>${totalManns} من  ${remainingKgs} کلو</span>
+            <span class="mann-display-badge">
+              <span class="num-bold">${totalManns}</span>
+              <span class="urdu bold">من</span>
+              <span class="plus-sep">+</span>
+              <span class="num-bold">${remainingKgs}</span>
+              <span class="urdu bold">کلو</span>
+            </span>
           </div>
           <div class="net-weight-hint">
             <span>(1 Mann = 40.00 Kgs)</span>
@@ -457,6 +509,22 @@ export function generateReceiptHtml(bill) {
       <div class="footer-stamp">
         <div class="urdu footer-greeting">شکریہ! دوبارہ تشریف لائیں۔</div>
         <div class="footer-shop-name">Sunheri Commission Shop • Ghalla Mandi, Malka Hans</div>
+      </div>
+    </div>
+
+    <!-- POS Software Credit Bar -->
+    <div class="software-credits-bar">
+      <div>
+        <span class="credits-label">POS Software: </span>
+        <span class="credits-bold">Easy Solutions</span>
+      </div>
+      <div>
+        <span class="urdu bold">رابطہ برائے کمپیوٹر سافٹ ویئر: </span>
+        <span class="credits-phone">0315-6566533</span>
+      </div>
+      <div>
+        <span class="credits-label">Contact: </span>
+        <span class="credits-phone">0315-6566533</span>
       </div>
     </div>
   </div>
