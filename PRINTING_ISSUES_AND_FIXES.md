@@ -163,3 +163,187 @@ This document logs the exact technical causes of these issues and the architectu
    - Integrated `resetTrigger` in `App.jsx` linked to `handleGenerateBill`.
    - Whenever a new bill is successfully saved, the pagination automatically jumps back to **Page 1**, guaranteeing the newly created bill is immediately visible at the very top of the list.
 
+---
+
+## 8. Issue 5: Print Button Opening "Save As..." File Dialog Instead of Direct Print Window
+
+### Symptoms Observed
+- When clicking the green "Print" button on the receipt preview modal, Windows opened a file explorer "Save As..." dialog asking where to save a `.pdf` file.
+- The operator had to save the file to disk, browse to the folder, and manually open it with Acrobat or a browser to print it on paper.
+
+### Root Cause
+- The primary print button had been routed to `window.api.savePdf(html, defaultName)`, which invokes Electron's `dialog.showSaveDialog` in the main process to export a PDF file.
+
+### Solutions Implemented
+- **Restored Direct Chromium Print Popup**:
+  - In [`src/renderer/src/components/ReceiptPreviewModal.jsx`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/components/ReceiptPreviewModal.jsx), re-engineered `handlePrint` to use an invisible `iframe`:
+    ```javascript
+    const iframe = document.createElement('iframe')
+    iframe.style.position = 'fixed'
+    iframe.style.right = '0'
+    iframe.style.bottom = '0'
+    iframe.style.width = '0'
+    iframe.style.height = '0'
+    iframe.style.border = '0'
+    document.body.appendChild(iframe)
+
+    const doc = iframe.contentWindow.document
+    doc.open()
+    doc.write(html)
+    doc.close()
+
+    setTimeout(() => {
+      iframe.contentWindow.focus()
+      iframe.contentWindow.print()
+      setTimeout(() => {
+        document.body.removeChild(iframe)
+      }, 1000)
+    }, 250)
+    ```
+  - **Result**: Clicking **"Print (پرنٹ کریں)"** immediately brings up the native Chromium print dialog on top of the app with printer selection, copies, and orientation. No file saving needed.
+- **Dedicated "Save PDF" Option**:
+  - Kept a separate secondary button **"Save PDF (پی ڈی ایف)"** so the user can still intentionally export a `.pdf` file whenever a digital copy is needed.
+
+---
+
+## 9. Issue 6: Authentic Mandi Emblem Integration (Wheat Wreath, Kapas & Green Crops)
+
+### Symptoms Observed
+- Initial implementations used generic or simplified SVG cotton flower graphics that did not match the shop's actual identity board.
+- The user provided a photograph of the physical shop board logo featuring two curved golden wheat stalks (گندم کی بالیاں), a central fluffy white cotton boll, and green crops/buds.
+
+### Solutions Implemented
+- **High-Fidelity Emblem Recreation**:
+  - Recreated the authentic agricultural emblem featuring:
+    1. Symmetrical golden wheat ears curving upwards on the left and right, crossed at the bottom.
+    2. Fluffy white cotton boll with dark green calyx leaves at top center.
+    3. Two green cotton pods/buds (کپاس کے ڈوڈے / سبز ٹینڈے) nestled inside the wreath.
+  - **Edge-Preserving Flood-Fill Transparency**:
+    - Applied a breadth-first search (BFS) flood-fill algorithm from image borders to only make the outer canvas transparent.
+    - Preserved 100% solid white coloring for the interior cotton lobes (preventing transparent holes inside the cotton flower).
+- **Embedded Offline Asset Pipeline**:
+  - Saved the transparent high-res PNG into `src/renderer/src/assets/mandi_logo.png`.
+  - Converted into a self-contained Base64 data URI in [`src/renderer/src/assets/mandiLogoBase64.js`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/assets/mandiLogoBase64.js).
+  - Ensured 100% offline reliability without filesystem path issues or CORS errors inside the print iframe.
+- **Component & Template Integration**:
+  - Integrated into [`src/renderer/src/components/KapasLogo.jsx`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/components/KapasLogo.jsx) for the React UI.
+  - Integrated into [`src/renderer/src/utils/receiptTemplate.js`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/utils/receiptTemplate.js) for physical printed receipts.
+  - Integrated into [`src/renderer/src/components/ReceiptHeader.jsx`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/components/ReceiptHeader.jsx) on the dashboard header with a clean contrast badge.
+
+---
+
+## 10. Issue 7: Urdu Mann / Kg Bidirectional (BiDi) Number Scrambling
+
+### Symptoms Observed
+- In the Net Weight Breakdown box, the line "وزن بحساب من" displayed as:
+  ```
+  من 1.00 کلو 308
+  ```
+- The number `308` jumped to the far left, `من` jumped to the far right, and `1.00 کلو` was scrambled in the center.
+
+### Root Cause
+- The string was formatted as `${totalManns} من ${remainingKgs} کلو` inside a single plain text element.
+- The browser's Unicode Bidirectional (BiDi) Algorithm (UAX #9) processed the string in an LTR parent container:
+  - `308` (numbers, LTR)
+  - `من` (Urdu text, RTL)
+  - `1.00` (numbers, LTR)
+  - `کلو` (Urdu text, RTL)
+- When numbers and RTL text alternate in an LTR block without boundary isolation, the BiDi engine reverses the RTL runs between LTR numbers, producing the scrambled visual output `من 1.00 کلو 308`.
+
+### Solutions Implemented
+- **Direction-Locked Badge Containers**:
+  - Wrapped each value and unit into explicit, direction-isolated inline elements:
+    ```html
+    <div class="net-weight-manns">
+      <span class="urdu">وزن بحساب من:</span>
+      <span class="mann-display-badge">
+        <span class="num-bold">${totalManns}</span>
+        <span class="urdu bold">من</span>
+        <span class="plus-sep">+</span>
+        <span class="num-bold">${remainingKgs}</span>
+        <span class="urdu bold">کلو</span>
+      </span>
+    </div>
+    ```
+  - Styled with:
+    ```css
+    .mann-display-badge {
+      display: inline-flex;
+      align-items: center;
+      direction: ltr;
+      gap: 3px;
+      font-size: 13.5px;
+    }
+    .num-bold {
+      font-family: monospace;
+      font-weight: 800;
+      font-size: 15px;
+      color: #000;
+    }
+    .plus-sep {
+      color: #555;
+      font-weight: 900;
+      margin: 0 1.5px;
+    }
+    ```
+  - Mirrored this structure in React ([`ReceiptPreviewModal.jsx`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/components/ReceiptPreviewModal.jsx) and [`ReceiptTemplate.jsx`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/components/ReceiptTemplate.jsx)).
+- **Result**: Visual display is locked and guaranteed to render as **`308 من + 1.00 کلو`** on all printers and screen previews.
+
+---
+
+## 11. Issue 8: POS Software Developer Credits
+
+### Requirement
+- Display developer support and contact info prominently on each receipt and across the app:
+  ```
+  POS Software: Easy Solutions | Contact: 0315-6566533
+  ```
+
+### Solutions Implemented
+1. **Printed Receipt Voucher** ([`src/renderer/src/utils/receiptTemplate.js`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/utils/receiptTemplate.js)):
+   - Added a dedicated full-width credit bar along the bottom border of the voucher card:
+     ```html
+     <div class="software-credits-bar">
+       <div>
+         <span class="credits-label">POS Software: </span>
+         <span class="credits-bold">Easy Solutions</span>
+       </div>
+       <div>
+         <span class="urdu bold">رابطہ برائے کمپیوٹر سافٹ ویئر: </span>
+         <span class="credits-phone">0315-6566533</span>
+       </div>
+       <div>
+         <span class="credits-label">Contact: </span>
+         <span class="credits-phone">0315-6566533</span>
+       </div>
+     </div>
+     ```
+2. **Receipt Preview Modal** ([`src/renderer/src/components/ReceiptPreviewModal.jsx`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/components/ReceiptPreviewModal.jsx)):
+   - Added matching footer credit bar at the bottom of the on-screen receipt preview.
+3. **Application Main Footer** ([`src/renderer/src/App.jsx`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/App.jsx)):
+   - Added a system footer pinned at the bottom of the dashboard:
+     ```jsx
+     <footer className="mt-4 pt-3 pb-2 border-t border-slate-800/80 flex flex-wrap justify-between items-center gap-2 text-xs text-slate-500">
+       <div>Sunheri Commission Shop (سنہری کمیشن شاپ) • Ghalla Mandi, Malka Hans</div>
+       <div className="flex items-center gap-2">
+         <span>POS Software: <strong className="text-slate-300">Easy Solutions</strong></span>
+         <span className="text-slate-600">•</span>
+         <span>Contact (رابطہ): <strong className="text-amber-400 font-mono">0315-6566533</strong></span>
+       </div>
+     </footer>
+     ```
+
+---
+
+## 12. Complete Change Log & File References
+
+| File | Changes Made |
+| :--- | :--- |
+| [`src/renderer/src/assets/mandiLogoBase64.js`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/assets/mandiLogoBase64.js) | Self-contained Base64 asset for authentic wheat wreath & cotton boll emblem with transparent background. |
+| [`src/renderer/src/components/KapasLogo.jsx`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/components/KapasLogo.jsx) | Updated to render authentic Mandi emblem image with scalable dimensions. |
+| [`src/renderer/src/components/ReceiptHeader.jsx`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/components/ReceiptHeader.jsx) | Updated header badge container to white background for high-contrast presentation of the logo. |
+| [`src/renderer/src/utils/receiptTemplate.js`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/utils/receiptTemplate.js) | Embedded authentic emblem, fixed Mann/Kg BiDi formatting (`308 من + 1.00 کلو`), and added POS Software credit bar at the bottom. |
+| [`src/renderer/src/components/ReceiptPreviewModal.jsx`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/components/ReceiptPreviewModal.jsx) | Restored direct Chromium print popup, fixed Mann/Kg BiDi layout, added "Save PDF" secondary button, and added POS Software credit bar. |
+| [`src/renderer/src/components/ReceiptTemplate.jsx`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/components/ReceiptTemplate.jsx) | Synchronized Mann/Kg BiDi fix and added POS Software credit bar. |
+| [`src/renderer/src/App.jsx`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/App.jsx) | Added POS Software developer contact footer at bottom of dashboard. |
+
