@@ -1,8 +1,11 @@
 import React, { useState } from 'react'
 import { Printer, Download, X, Check, FileText } from 'lucide-react'
 import { generateReceiptHtml } from '../utils/receiptTemplate'
+import KapasLogo from './KapasLogo'
 
 export default function ReceiptPreviewModal({ bill, isOpen, onClose, onPrint }) {
+  const [printing, setPrinting] = useState(false)
+  const [printSuccess, setPrintSuccess] = useState(false)
   const [savingPdf, setSavingPdf] = useState(false)
   const [pdfSuccess, setPdfSuccess] = useState(false)
 
@@ -29,7 +32,46 @@ export default function ReceiptPreviewModal({ bill, isOpen, onClose, onPrint }) 
     maximumFractionDigits: 2
   })
 
-  // Handle Save As PDF
+  // Direct Print Popup: Instantly triggers the system/Chromium print window!
+  const handlePrint = () => {
+    setPrinting(true)
+    setPrintSuccess(false)
+    const html = generateReceiptHtml(bill)
+
+    try {
+      const iframe = document.createElement('iframe')
+      iframe.style.position = 'fixed'
+      iframe.style.right = '0'
+      iframe.style.bottom = '0'
+      iframe.style.width = '0'
+      iframe.style.height = '0'
+      iframe.style.border = '0'
+      document.body.appendChild(iframe)
+
+      const doc = iframe.contentWindow.document
+      doc.open()
+      doc.write(html)
+      doc.close()
+
+      iframe.contentWindow.focus()
+      setTimeout(() => {
+        iframe.contentWindow.print()
+        setPrintSuccess(true)
+        setTimeout(() => setPrintSuccess(false), 3000)
+        setTimeout(() => {
+          try {
+            document.body.removeChild(iframe)
+          } catch (_) {}
+          setPrinting(false)
+        }, 2000)
+      }, 350)
+    } catch (err) {
+      console.error('Error triggering print window:', err)
+      setPrinting(false)
+    }
+  }
+
+  // Handle Save As PDF file to disk
   const handleSavePdf = async () => {
     setSavingPdf(true)
     setPdfSuccess(false)
@@ -43,29 +85,6 @@ export default function ReceiptPreviewModal({ bill, isOpen, onClose, onPrint }) 
           setPdfSuccess(true)
           setTimeout(() => setPdfSuccess(false), 3000)
         }
-      } else {
-        const iframe = document.createElement('iframe')
-        iframe.style.position = 'fixed'
-        iframe.style.right = '0'
-        iframe.style.bottom = '0'
-        iframe.style.width = '0'
-        iframe.style.height = '0'
-        iframe.style.border = '0'
-        document.body.appendChild(iframe)
-
-        const doc = iframe.contentWindow.document
-        doc.open()
-        doc.write(html)
-        doc.close()
-
-        iframe.contentWindow.focus()
-        setTimeout(() => {
-          iframe.contentWindow.print()
-          setTimeout(() => document.body.removeChild(iframe), 2000)
-        }, 300)
-
-        setPdfSuccess(true)
-        setTimeout(() => setPdfSuccess(false), 3000)
       }
     } catch (err) {
       console.error('Error saving PDF:', err)
@@ -118,16 +137,20 @@ export default function ReceiptPreviewModal({ bill, isOpen, onClose, onPrint }) 
               </div>
 
               {/* Center: Urdu Branding & Tagline with generous line-height and margin */}
+              {/* Center: Kapas Logo Emblem + Urdu Branding & Tagline */}
               <div className="w-[38%] text-center flex flex-col items-center justify-center">
+                <div className="flex items-center justify-center mb-1">
+                  <KapasLogo size={42} />
+                </div>
                 <div
                   className="font-urdu font-black text-2xl text-slate-950 select-text"
-                  style={{ lineHeight: 2.2 }}
+                  style={{ lineHeight: 1.9 }}
                 >
                   سنہری کمیشن شاپ
                 </div>
                 <div
-                  className="text-[11px] font-urdu font-bold text-slate-800 mt-2 select-text"
-                  style={{ lineHeight: 1.8 }}
+                  className="text-[11px] font-urdu font-bold text-slate-800 mt-1 select-text"
+                  style={{ lineHeight: 1.6 }}
                 >
                   ہر قسم کی زرعی اجناس کی خرید و فروخت کا با اعتماد ادارہ
                 </div>
@@ -270,33 +293,50 @@ export default function ReceiptPreviewModal({ bill, isOpen, onClose, onPrint }) 
           </div>
         </div>
 
-        {/* Modal Actions Footer: Clean Print & Close actions */}
+        {/* Modal Actions Footer: Direct Print Popup & Save PDF options */}
         <div className="px-6 py-3.5 bg-slate-800 border-t border-slate-700 flex flex-wrap items-center justify-between gap-3">
           <div className="text-xs text-slate-300 font-medium">
+            {printSuccess && (
+              <span className="text-emerald-400 font-bold flex items-center gap-1.5">
+                <Check className="w-4 h-4" /> Print dialog opened!
+              </span>
+            )}
             {pdfSuccess && (
               <span className="text-emerald-400 font-bold flex items-center gap-1.5">
-                <Check className="w-4 h-4" /> Receipt sent to printer / PDF dialog!
+                <Check className="w-4 h-4" /> PDF saved successfully!
               </span>
             )}
           </div>
 
           <div className="flex items-center gap-2.5">
-            {/* Primary Print Button (Renamed from Save PDF, keeping exact reliable functionality) */}
+            {/* Primary Print Button: Immediately triggers the Print Dialog Popup */}
+            <button
+              type="button"
+              onClick={handlePrint}
+              disabled={printing}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-xs transition shadow-lg cursor-pointer active:scale-95 disabled:opacity-50"
+              title="Open Print Dialog to select printer and print immediately"
+            >
+              <Printer className="w-4 h-4" />
+              <span>{printing ? 'Opening Print Dialog...' : 'Print (پرنٹ کریں)'}</span>
+            </button>
+
+            {/* Optional Save PDF Button */}
             <button
               type="button"
               onClick={handleSavePdf}
               disabled={savingPdf}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-xs transition shadow-lg cursor-pointer active:scale-95"
-              title="Print Receipt or Save as PDF"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-xs transition cursor-pointer active:scale-95 disabled:opacity-50"
+              title="Save as PDF file to your computer"
             >
-              <Printer className="w-4 h-4" />
-              <span>{savingPdf ? 'Preparing Print...' : 'Print (پرنٹ کریں)'}</span>
+              <Download className="w-3.5 h-3.5" />
+              <span>{savingPdf ? 'Saving...' : 'Save PDF (پی ڈی ایف)'}</span>
             </button>
 
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-xs transition cursor-pointer"
+              className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition cursor-pointer"
             >
               Close (بند کریں)
             </button>

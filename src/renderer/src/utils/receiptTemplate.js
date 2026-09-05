@@ -1,3 +1,5 @@
+import { KAPAS_LOGO_SVG } from './kapasLogoSvg.js'
+
 /**
  * Generates an optimized, self-contained HTML receipt template
  * specifically formatted for A5 Landscape (Half of standard A4, horizontal: 210mm x 148.5mm).
@@ -110,11 +112,17 @@ export function generateReceiptHtml(bill) {
       align-items: center;
       justify-content: center;
     }
+    .kapas-emblem-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 2px;
+    }
     .shop-title-ur {
       font-size: 22px;
       font-weight: 900;
-      line-height: 2.2;
-      margin-bottom: 8px;
+      line-height: 1.9;
+      margin-bottom: 4px;
       padding-bottom: 1px;
       display: block;
       color: #000;
@@ -123,7 +131,7 @@ export function generateReceiptHtml(bill) {
       font-size: 11px;
       font-weight: 700;
       color: #111;
-      line-height: 1.8;
+      line-height: 1.6;
       display: block;
     }
     .header-right {
@@ -328,8 +336,11 @@ export function generateReceiptHtml(bill) {
         <div class="location-text-ur urdu">غلہ منڈی ملکہ ہانس</div>
       </div>
 
-      <!-- Center: Urdu Title & Tagline with explicit vertical separation -->
+      <!-- Center: Kapas Logo Emblem + Urdu Title & Tagline -->
       <div class="header-center">
+        <div class="kapas-emblem-wrap">
+          ${KAPAS_LOGO_SVG}
+        </div>
         <span class="shop-title-ur urdu">سنہری کمیشن شاپ</span>
         <span class="tagline-ur urdu">ہر قسم کی زرعی اجناس کی خرید و فروخت کا با اعتماد ادارہ</span>
       </div>

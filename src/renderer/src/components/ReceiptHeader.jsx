@@ -1,5 +1,6 @@
 import React from 'react'
 import { Phone, MapPin, Sparkles } from 'lucide-react'
+import KapasLogo from './KapasLogo'
 
 export default function ReceiptHeader() {
   const contacts = [
@@ -38,8 +39,8 @@ export default function ReceiptHeader() {
       <div className="flex flex-col lg:flex-row items-center justify-between gap-5 pb-5 border-b border-slate-800/90">
         {/* Left Branding */}
         <div className="flex items-center gap-4 text-center lg:text-left">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600 flex items-center justify-center font-black text-slate-950 text-2xl shadow-lg ring-4 ring-amber-400/20 shrink-0">
-            سنہری
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600 flex items-center justify-center p-1.5 shadow-lg ring-4 ring-amber-400/20 shrink-0">
+            <KapasLogo size={44} />
           </div>
           <div>
             <div className="flex items-center gap-3 justify-center lg:justify-start">
@@ -55,17 +56,20 @@ export default function ReceiptHeader() {
           </div>
         </div>
 
-        {/* Center: Urdu Shop Title & Tagline */}
-        <div className="text-center px-8 py-5 rounded-2xl bg-slate-950/90 border border-slate-800 shadow-inner flex flex-col items-center justify-center">
+        {/* Center: Urdu Shop Title & Tagline with Kapas Emblem */}
+        <div className="text-center px-8 py-4 rounded-2xl bg-slate-950/90 border border-slate-800 shadow-inner flex flex-col items-center justify-center">
+          <div className="flex items-center justify-center mb-1">
+            <KapasLogo size={44} />
+          </div>
           <h2
             className="text-2xl sm:text-3xl font-bold font-urdu text-amber-300 tracking-normal drop-shadow-md select-text"
-            style={{ lineHeight: 2.2 }}
+            style={{ lineHeight: 1.9 }}
           >
             سنہری کمیشن شاپ
           </h2>
           <p
-            className="text-xs sm:text-sm text-amber-100/90 font-urdu font-medium tracking-wide mt-2.5 select-text"
-            style={{ lineHeight: 1.8 }}
+            className="text-xs sm:text-sm text-amber-100/90 font-urdu font-medium tracking-wide mt-1.5 select-text"
+            style={{ lineHeight: 1.6 }}
           >
             ہر قسم کی زرعی اجناس کی خرید و فروخت کا با اعتماد ادارہ
           </p>
