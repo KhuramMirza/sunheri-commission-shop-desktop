@@ -6,9 +6,14 @@ import { printReceiptSilently, saveReceiptAsPdf, getSystemPrinters } from './pri
 import { licenseService, RSA_PUBLIC_KEY } from './license.js'
 
 function createWindow() {
+  const preloadCjs = join(__dirname, '../preload/index.cjs')
   const preloadJs = join(__dirname, '../preload/index.js')
   const preloadMjs = join(__dirname, '../preload/index.mjs')
-  const preloadPath = fs.existsSync(preloadJs) ? preloadJs : preloadMjs
+  const preloadPath = fs.existsSync(preloadCjs)
+    ? preloadCjs
+    : fs.existsSync(preloadJs)
+      ? preloadJs
+      : preloadMjs
 
   const mainWindow = new BrowserWindow({
     width: 1280,
