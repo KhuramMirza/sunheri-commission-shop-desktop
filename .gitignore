@@ -46,3 +46,7 @@ Desktop.ini
 # Electron-builder artifacts & test outputs
 *.blockmap
 *.pdf
+
+# Cryptographic Keys (Licenses)
+keys/
+*.pem
