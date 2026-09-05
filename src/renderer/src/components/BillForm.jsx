@@ -18,6 +18,7 @@ export default function BillForm({
   calculations,
   onInputChange,
   onClearForm,
+  onGenerateBill,
   onGenerateAndPrint,
   onPreviewReceipt
 }) {
@@ -311,14 +312,18 @@ export default function BillForm({
           type="button"
           onClick={(e) => {
             e.preventDefault()
-            onGenerateAndPrint(e)
+            if (onGenerateBill) {
+              onGenerateBill(e)
+            } else if (onGenerateAndPrint) {
+              onGenerateAndPrint(e)
+            }
           }}
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-slate-950 font-black text-sm tracking-wide transition shadow-lg hover:shadow-amber-500/20 active:scale-95 cursor-pointer"
         >
-          <Printer className="w-4 h-4" />
-          <span>Generate & Print Bill</span>
+          <Scale className="w-4 h-4 text-slate-950" />
+          <span>Generate Bill</span>
           <span className="font-urdu text-sm font-bold text-slate-900 ml-1.5">
-            (بل بنائیں اور پرنٹ کریں)
+            (بل بنائیں)
           </span>
         </button>
       </div>

@@ -1,6 +1,7 @@
 /**
  * Generates an optimized, self-contained HTML receipt template
  * specifically formatted for A5 Landscape (Half of standard A4, horizontal: 210mm x 148.5mm).
+ * Engineered for high-contrast legibility, no hollow vertical gaps, and proper Urdu typography.
  * @param {object} bill - Bill record containing all transaction & calculated fields
  * @returns {string} Fully self-contained HTML document string
  */
@@ -10,7 +11,7 @@ export function generateReceiptHtml(bill) {
   const time = bill.createdAt
     ? new Date(bill.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  const clientName = bill.clientName || 'Cash Client (نقد گاہک)'
+  const clientName = bill.clientName ? bill.clientName.trim() : 'Cash Client (نقد گاہک)'
   const saafi = Number(bill.saafiWeight || 0).toFixed(2)
   const bardana = Number(bill.bardanaWeight || 0).toFixed(2)
   const kanda = Number(bill.kandaWeight || 0).toFixed(2)
@@ -34,7 +35,7 @@ export function generateReceiptHtml(bill) {
   <style>
     @page {
       size: A5 landscape;
-      margin: 5mm 8mm;
+      margin: 6mm 8mm;
     }
     * {
       box-sizing: border-box;
@@ -42,172 +43,259 @@ export function generateReceiptHtml(bill) {
       padding: 0;
     }
     body {
-      width: 194mm;
+      width: 100%;
       max-width: 194mm;
-      height: 138mm;
-      max-height: 138mm;
       margin: 0 auto;
-      padding: 3mm 2mm;
+      padding: 0;
       font-family: 'Segoe UI', Tahoma, -apple-system, BlinkMacSystemFont, 'Noto Nastaliq Urdu', 'Noto Sans Arabic', sans-serif;
-      font-size: 11.5px;
-      line-height: 1.3;
+      font-size: 12.5px;
+      line-height: 1.35;
       color: #000;
       background: #fff;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
-    .urdu { font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', 'Urdu Typesetting', Tahoma, sans-serif; }
+    .urdu {
+      font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', 'Urdu Typesetting', Tahoma, sans-serif;
+    }
     .text-center { text-align: center; }
     .text-right { text-align: right; }
     .text-left { text-align: left; }
     .bold { font-weight: bold; }
-    
+
+    /* Outer Voucher Card */
+    .voucher-card {
+      border: 2px solid #000;
+      border-radius: 6px;
+      padding: 3mm 4mm;
+      background: #fff;
+    }
+
     /* Header Styles */
     .header-container {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-bottom: 3mm;
+      padding-bottom: 2.5mm;
       border-bottom: 2px solid #000;
+      gap: 3mm;
     }
     .header-left {
       width: 32%;
       text-align: left;
     }
     .shop-title-en {
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 900;
       letter-spacing: 0.5px;
       text-transform: uppercase;
+      line-height: 1.2;
     }
     .location-text {
-      font-size: 10px;
-      font-weight: 600;
+      font-size: 11px;
+      font-weight: 700;
       color: #222;
+      margin-top: 2px;
+    }
+    .location-text-ur {
+      font-size: 11px;
+      color: #333;
       margin-top: 1px;
     }
     .header-center {
-      width: 36%;
+      width: 38%;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
     .shop-title-ur {
-      font-size: 20px;
-      font-weight: bold;
-      line-height: 1.4;
+      font-size: 22px;
+      font-weight: 900;
+      line-height: 2.2;
+      margin-bottom: 8px;
+      padding-bottom: 1px;
+      display: block;
+      color: #000;
     }
     .tagline-ur {
-      font-size: 9.5px;
-      font-weight: 600;
-      color: #333;
+      font-size: 11px;
+      font-weight: 700;
+      color: #111;
+      line-height: 1.8;
+      display: block;
     }
     .header-right {
       width: 30%;
-      font-size: 9px;
+      font-size: 10px;
       text-align: right;
     }
     .contact-row {
       display: flex;
       justify-content: space-between;
-      margin: 1px 0;
+      margin: 1.5px 0;
+      line-height: 1.2;
     }
-    
+    .contact-name {
+      font-size: 9.5px;
+      color: #333;
+    }
+    .contact-phone {
+      font-weight: 800;
+      font-family: 'Segoe UI', Tahoma, monospace;
+      color: #000;
+    }
+
     /* Meta Row */
     .meta-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #f4f4f4;
+      background: #f0f0f0;
       border: 1.5px solid #000;
       border-radius: 4px;
-      padding: 2mm 3.5mm;
+      padding: 1.8mm 3mm;
       margin: 2mm 0;
-      font-size: 12px;
+      font-size: 12.5px;
     }
     .meta-item {
       display: flex;
-      gap: 4px;
+      gap: 5px;
+      align-items: baseline;
     }
-    
+    .meta-sno {
+      font-size: 14px;
+      font-weight: 900;
+      font-family: monospace;
+      color: #000;
+    }
+    .meta-client {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #000;
+    }
+
     /* Main Two-Column Content Grid */
     .content-grid {
       display: flex;
-      gap: 5mm;
+      gap: 3mm;
       margin: 1.5mm 0;
-      flex: 1;
     }
     .weight-column {
-      flex: 1.2;
+      flex: 1.15;
       border: 1.5px solid #000;
       border-radius: 4px;
-      padding: 2.5mm 3.5mm;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+      padding: 2.5mm 3mm;
+      background: #fff;
     }
     .finance-column {
       flex: 1;
       border: 1.5px solid #000;
       border-radius: 4px;
-      padding: 2.5mm 3.5mm;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+      padding: 2.5mm 3mm;
       background: #fafafa;
     }
-    .table-title {
-      font-size: 11px;
-      font-weight: bold;
+    .section-title {
+      font-size: 11.5px;
+      font-weight: 800;
       text-transform: uppercase;
-      border-bottom: 1px solid #000;
+      border-bottom: 1.5px solid #000;
       padding-bottom: 1mm;
       margin-bottom: 1.5mm;
       display: flex;
       justify-content: space-between;
+      align-items: center;
     }
     .data-row {
       display: flex;
       justify-content: space-between;
-      padding: 1px 0;
+      align-items: center;
+      padding: 1.5px 0;
+      font-size: 12.5px;
+    }
+    .data-row-num {
+      font-family: 'Segoe UI', Tahoma, monospace;
+      font-weight: 600;
     }
     .net-weight-box {
-      background: #eaeaea;
-      border: 1px solid #000;
-      border-radius: 3px;
-      padding: 2mm;
+      background: #e8e8e8;
+      border: 1.5px solid #000;
+      border-radius: 4px;
+      padding: 2mm 2.5mm;
+      margin-top: 2.5mm;
+    }
+    .net-weight-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 900;
+      border-bottom: 1px solid #777;
+      padding-bottom: 1mm;
+    }
+    .net-weight-manns {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13.5px;
+      font-weight: 800;
       margin-top: 1.5mm;
     }
+    .net-weight-hint {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: #444;
+      margin-top: 1mm;
+    }
+
+    /* Financial Column */
     .total-bill-box {
       border: 2px solid #000;
-      border-radius: 4px;
-      padding: 2.5mm;
+      border-radius: 5px;
+      padding: 2.5mm 2mm;
       text-align: center;
       background: #fff;
-      margin-top: 2mm;
+      margin-top: 2.5mm;
+    }
+    .total-bill-label {
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     .total-amount-number {
-      font-size: 18px;
+      font-size: 22px;
       font-weight: 900;
       color: #000;
-      margin-top: 1px;
+      font-family: 'Segoe UI', Tahoma, monospace;
+      margin: 1mm 0;
+      letter-spacing: -0.5px;
+    }
+    .total-bill-breakdown {
+      font-size: 10px;
+      color: #333;
+      font-family: monospace;
+      font-weight: 600;
     }
 
     /* Signature & Manual Notes Section */
     .signature-container {
       border-top: 1.5px solid #000;
       padding-top: 2mm;
-      margin-top: 1.5mm;
+      margin-top: 2mm;
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
     }
     .signature-line-box {
-      width: 65%;
+      width: 62%;
     }
     .signature-text {
-      font-size: 10px;
-      font-weight: bold;
-      margin-bottom: 5mm; /* Generous vertical writing space for pencil */
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 6mm; /* Generous vertical writing space for pencil/pen */
     }
     .signature-underline {
       border-bottom: 1.5px dashed #444;
@@ -215,146 +303,153 @@ export function generateReceiptHtml(bill) {
       height: 1px;
     }
     .footer-stamp {
-      width: 32%;
+      width: 35%;
       text-align: right;
-      font-size: 9.5px;
+    }
+    .footer-greeting {
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .footer-shop-name {
+      font-size: 9px;
+      color: #444;
+      margin-top: 1px;
     }
   </style>
 </head>
 <body>
-  <!-- Header Details -->
-  <div class="header-container">
-    <!-- Left: English Title & Location -->
-    <div class="header-left">
-      <div class="shop-title-en">Sunheri Commission Shop</div>
-      <div class="location-text">Ghalla Mandi, Malka Hans</div>
-      <div style="font-size: 9px; color: #444; margin-top: 1px;">غلہ منڈی ملکہ ہانس</div>
+  <div class="voucher-card">
+    <!-- Header Details -->
+    <div class="header-container">
+      <!-- Left: English Title & Location -->
+      <div class="header-left">
+        <div class="shop-title-en">Sunheri Commission Shop</div>
+        <div class="location-text">Ghalla Mandi, Malka Hans</div>
+        <div class="location-text-ur urdu">غلہ منڈی ملکہ ہانس</div>
+      </div>
+
+      <!-- Center: Urdu Title & Tagline with explicit vertical separation -->
+      <div class="header-center">
+        <span class="shop-title-ur urdu">سنہری کمیشن شاپ</span>
+        <span class="tagline-ur urdu">ہر قسم کی زرعی اجناس کی خرید و فروخت کا با اعتماد ادارہ</span>
+      </div>
+
+      <!-- Right: Contacts -->
+      <div class="header-right">
+        <div class="contact-row">
+          <span class="contact-name">حاجی شبیر حسین (صدر):</span>
+          <span class="contact-phone">0300-9696234</span>
+        </div>
+        <div class="contact-row">
+          <span class="contact-name">حاجی فقیر حسین:</span>
+          <span class="contact-phone">0302-6535403</span>
+        </div>
+        <div class="contact-row">
+          <span class="contact-name">چوہدری سمیع:</span>
+          <span class="contact-phone">0303-4884306</span>
+        </div>
+        <div class="contact-row">
+          <span class="contact-name">چوہدری بلال:</span>
+          <span class="contact-phone">0309-9692044</span>
+        </div>
+      </div>
     </div>
 
-    <!-- Center: Urdu Title & Tagline -->
-    <div class="header-center">
-      <div class="shop-title-ur urdu">سنہری کمیشن شاپ</div>
-      <div class="tagline-ur urdu">ہر قسم کی زرعی اجناس کی خرید و فروخت کا با اعتماد ادارہ</div>
+    <!-- Meta Information Bar -->
+    <div class="meta-bar">
+      <div class="meta-item">
+        <span class="bold">بل نمبر (S.No):</span>
+        <span class="meta-sno">#${serialNo}</span>
+      </div>
+      <div class="meta-item">
+        <span class="bold">تاریخ و وقت (Date & Time):</span>
+        <span>${date} ${time}</span>
+      </div>
+      <div class="meta-item">
+        <span class="bold">گاہک / زمیندار (Client):</span>
+        <span class="meta-client">${clientName}</span>
+      </div>
     </div>
 
-    <!-- Right: Contacts -->
-    <div class="header-right">
-      <div class="contact-row">
-        <span>حاجی شبیر حسین (صدر):</span>
-        <span class="bold">0300-9696234</span>
-      </div>
-      <div class="contact-row">
-        <span>حاجی فقیر حسین:</span>
-        <span class="bold">0302-6535403</span>
-      </div>
-      <div class="contact-row">
-        <span>چوہدری سمیع:</span>
-        <span class="bold">0303-4884306</span>
-      </div>
-      <div class="contact-row">
-        <span>چوہدری بلال:</span>
-        <span class="bold">0309-9692044</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Meta Information Bar -->
-  <div class="meta-bar">
-    <div class="meta-item">
-      <span class="bold">بل نمبر (Bill S.No):</span>
-      <span class="bold">#${serialNo}</span>
-    </div>
-    <div class="meta-item">
-      <span class="bold">تاریخ و وقت (Date & Time):</span>
-      <span>${date} ${time}</span>
-    </div>
-    <div class="meta-item">
-      <span class="bold">گاہک / زمیندار (Client):</span>
-      <span class="bold" style="font-size: 13px;">${clientName}</span>
-    </div>
-  </div>
-
-  <!-- Main Horizontal Content Columns -->
-  <div class="content-grid">
-    <!-- Column 1: Weight Deductions & Net Weight -->
-    <div class="weight-column">
-      <div>
-        <div class="table-title">
+    <!-- Main Content Columns -->
+    <div class="content-grid">
+      <!-- Column 1: Weight Deductions & Net Weight -->
+      <div class="weight-column">
+        <div class="section-title">
           <span>وزن کی تفصیل (Weight Breakdown)</span>
-          <span class="urdu">کلوگرام</span>
+          <span class="urdu bold">کلوگرام</span>
         </div>
         <div class="data-row">
           <span>صافی وزن (Gross Weight):</span>
-          <span class="bold">${saafi} Kg</span>
+          <span class="bold data-row-num">${saafi} Kg</span>
         </div>
         <div class="data-row" style="color: #444;">
           <span>باردانہ کٹوتی (Bardana Deduction):</span>
-          <span>-${bardana} Kg</span>
+          <span class="data-row-num">-${bardana} Kg</span>
         </div>
         <div class="data-row" style="color: #444;">
-          <span>کنڈہ کٹوتی (Kanda Machine Deduction):</span>
-          <span>-${kanda} Kg</span>
+          <span>کنڈہ کٹوتی (Kanda Deduction):</span>
+          <span class="data-row-num">-${kanda} Kg</span>
+        </div>
+
+        <!-- Net Weight Box -->
+        <div class="net-weight-box">
+          <div class="net-weight-header">
+            <span>خالص وزن (Net Weight):</span>
+            <span class="data-row-num">${netWeight} Kg</span>
+          </div>
+          <div class="net-weight-manns">
+            <span class="urdu">وزن بحساب من:</span>
+            <span>${totalManns} من  ${remainingKgs} کلو</span>
+          </div>
+          <div class="net-weight-hint">
+            <span>(1 Mann = 40.00 Kgs)</span>
+            <span style="font-family: monospace;">${totalManns} Manns + ${remainingKgs} Kgs</span>
+          </div>
         </div>
       </div>
 
-      <!-- Net Weight and Manns Conversion Box -->
-      <div class="net-weight-box">
-        <div class="data-row bold" style="font-size: 13px;">
-          <span>خالص وزن (Net Weight):</span>
-          <span>${netWeight} Kg</span>
-        </div>
-        <div class="data-row bold" style="font-size: 12px; margin-top: 2px;">
-          <span class="urdu">وزن بحساب من:</span>
-          <span>${totalManns} من  ${remainingKgs} کلو</span>
-        </div>
-        <div class="data-row" style="font-size: 9.5px; color: #555; margin-top: 1px;">
-          <span>(1 Mann = 40.00 Kgs)</span>
-          <span>${totalManns} Manns + ${remainingKgs} Kgs</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Column 2: Financial Calculation & Total Amount -->
-    <div class="finance-column">
-      <div>
-        <div class="table-title">
+      <!-- Column 2: Financial Calculation & Total Amount -->
+      <div class="finance-column">
+        <div class="section-title">
           <span>حساب رقم (Financial Summary)</span>
-          <span class="urdu">روپیہ</span>
+          <span class="urdu bold">روپیہ</span>
         </div>
         <div class="data-row">
           <span>ریٹ فی من (Rate / Mann):</span>
-          <span class="bold">Rs. ${ratePerMann}</span>
+          <span class="bold data-row-num">Rs. ${ratePerMann}</span>
         </div>
         <div class="data-row" style="color: #444;">
           <span>ریٹ فی کلو (Rate / 1 Kg):</span>
-          <span>Rs. ${ratePerKg}</span>
+          <span class="data-row-num">Rs. ${ratePerKg}</span>
         </div>
-      </div>
 
-      <!-- Highlighted Total Bill Box -->
-      <div class="total-bill-box">
-        <div class="bold" style="font-size: 11px;">کل رقم (TOTAL BILL AMOUNT)</div>
-        <div class="total-amount-number">Rs. ${totalBill}</div>
-        <div style="font-size: 9.5px; color: #444; margin-top: 1px;">
-          ${totalManns}M ${remainingKgs}Kg @ Rs.${ratePerMann}/Mann
+        <!-- Total Bill Box -->
+        <div class="total-bill-box">
+          <div class="total-bill-label">کل رقم (TOTAL BILL AMOUNT)</div>
+          <div class="total-amount-number">Rs. ${totalBill}</div>
+          <div class="total-bill-breakdown">
+            ${totalManns}M ${remainingKgs}Kg @ Rs.${ratePerMann}/Mann
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Signature & Manual Notes Area with Generous Pencil Writing Space -->
-  <div class="signature-container">
-    <div class="signature-line-box">
-      <div class="signature-text">
-        <span>دستخط یا قلمی نوٹ (Signature / Notes):</span>
+    <!-- Signature & Manual Notes Area -->
+    <div class="signature-container">
+      <div class="signature-line-box">
+        <div class="signature-text">
+          <span>دستخط یا قلمی نوٹ (Signature / Notes):</span>
+        </div>
+        <div class="signature-underline"></div>
       </div>
-      <div class="signature-underline"></div>
-    </div>
-    <div class="footer-stamp">
-      <div class="urdu bold" style="font-size: 11px;">شکریہ! دوبارہ تشریف لائیں۔</div>
-      <div style="font-size: 8.5px; color: #555; margin-top: 1px;">Sunheri Commission Shop • Ghalla Mandi, Malka Hans</div>
+      <div class="footer-stamp">
+        <div class="urdu footer-greeting">شکریہ! دوبارہ تشریف لائیں۔</div>
+        <div class="footer-shop-name">Sunheri Commission Shop • Ghalla Mandi, Malka Hans</div>
+      </div>
     </div>
   </div>
 </body>
 </html>`
 }
+

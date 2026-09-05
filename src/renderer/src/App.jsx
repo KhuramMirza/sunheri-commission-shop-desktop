@@ -28,7 +28,6 @@ export default function App() {
   // State for historical transactions list
   const [transactions, setTransactions] = useState([])
   const [loading, setLoading] = useState(true)
-  const [printStatus, setPrintStatus] = useState(null) // null | 'printing' | 'printed' | 'failed'
 
   // Receipt Preview Modal State
   const [previewModalOpen, setPreviewModalOpen] = useState(false)
@@ -96,35 +95,6 @@ export default function App() {
     }
   }, [formData.saafiWeight, formData.bardanaWeight, formData.kandaWeight, formData.ratePerMann])
 
-  // Print Execution Handler via Electron IPC Bridge
-  const handlePrintReceipt = useCallback(async (bill, options = {}) => {
-    const html = generateReceiptHtml(bill)
-    setPrintStatus('printing')
-
-    try {
-      if (window.api && window.api.printReceipt) {
-        const res = await window.api.printReceipt(html, options)
-        if (res && res.success === false) {
-          console.warn('Printer call returned status:', res.error)
-          setPrintStatus('failed')
-        } else {
-          setPrintStatus('printed')
-        }
-      } else if (window.electron && window.electron.ipcRenderer) {
-        window.electron.ipcRenderer.send('print-receipt', html)
-        setPrintStatus('printed')
-      } else {
-        console.warn('Electron IPC printer bridge not found (pure web mode).')
-        setPrintStatus('printed')
-      }
-    } catch (err) {
-      console.error('Print failed:', err)
-      setPrintStatus('failed')
-    } finally {
-      setTimeout(() => setPrintStatus(null), 3500)
-    }
-  }, [])
-
   // Open Preview Modal for current form data
   const handlePreviewCurrentForm = () => {
     const billPreview = {
@@ -174,8 +144,8 @@ export default function App() {
     }))
   }
 
-  // Generate & Print / Save to NeDB Database Handler
-  const handleGenerateAndPrint = async (e) => {
+  // Generate Bill & Save to NeDB Database Handler
+  const handleGenerateBill = async (e) => {
     if (e && typeof e.preventDefault === 'function') {
       e.preventDefault()
     }
@@ -219,9 +189,6 @@ export default function App() {
         localStorage.setItem('mandi_bills', JSON.stringify(stored))
       }
 
-      // Trigger Silent Thermal Print to system default printer
-      await handlePrintReceipt(savedDoc || billRecord)
-
       // Automatically re-fetch database records and update next serial number
       await fetchBills()
       await fetchNextSerialNo()
@@ -235,9 +202,14 @@ export default function App() {
         kandaWeight: '',
         ratePerMann: ''
       }))
+
+      // Automatically open receipt preview modal so user can click Print
+      const currentSavedBill = savedDoc || billRecord
+      setPreviewBill(currentSavedBill)
+      setPreviewModalOpen(true)
     } catch (err) {
-      console.error('Failed to process and print bill:', err)
-      alert('خرابی: بل محفوظ یا پرنٹ نہیں ہو سکا۔ (Error processing bill)')
+      console.error('Failed to process bill:', err)
+      alert('خرابی: بل محفوظ نہیں ہو سکا۔ (Error saving bill)')
     }
   }
 
@@ -265,68 +237,32 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col p-4 md:p-6 gap-4 md:gap-5 overflow-y-auto relative font-sans">
-      {/* Silent Print Toast Notification */}
-      {printStatus && (
-        <div className="fixed top-5 right-5 z-50 animate-bounce">
-          <div
-            className={`px-5 py-3 rounded-2xl shadow-2xl border flex items-center gap-3 text-sm font-bold ${
-              printStatus === 'printing'
-                ? 'bg-amber-500 text-slate-950 border-amber-300'
-                : printStatus === 'printed'
-                ? 'bg-emerald-600 text-white border-emerald-400'
-                : 'bg-rose-600 text-white border-rose-400'
-            }`}
-          >
-            {printStatus === 'printing' && (
-              <>
-                <span className="w-3 h-3 rounded-full bg-slate-950 animate-ping" />
-                <span>Printing receipt to default printer... (پرنٹ جاری ہے)</span>
-              </>
-            )}
-            {printStatus === 'printed' && (
-              <>
-                <span className="text-base">✓</span>
-                <span>Receipt sent silently to printer! (رسید پرنٹ ہو گئی)</span>
-              </>
-            )}
-            {printStatus === 'failed' && (
-              <>
-                <span>⚠</span>
-                <span>Printer offline or not found. Check default printer settings.</span>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* 1. Header Section */}
       <ReceiptHeader />
 
-      {/* 2. Middle Form Section with Preview and Print actions */}
+      {/* 2. Middle Form Section with Preview and Generate actions */}
       <BillForm
         formData={formData}
         calculations={calculations}
         onInputChange={handleInputChange}
         onClearForm={handleClearForm}
-        onGenerateAndPrint={handleGenerateAndPrint}
+        onGenerateBill={handleGenerateBill}
         onPreviewReceipt={handlePreviewCurrentForm}
       />
 
-      {/* 3. Bottom Section: Daily Transaction Ledger with on-screen Preview support */}
+      {/* 3. Bottom Section: Daily Transaction Ledger with on-screen Print/Preview support */}
       <LedgerTable
         transactions={transactions}
         loading={loading}
         onDeleteTransaction={handleDeleteTransaction}
-        onReprintTransaction={handlePrintReceipt}
         onPreviewTransaction={handlePreviewTransaction}
       />
 
-      {/* 4. On-Screen Receipt Preview & PDF Export Modal */}
+      {/* 4. On-Screen Receipt Preview & Print Modal */}
       <ReceiptPreviewModal
         bill={previewBill}
         isOpen={previewModalOpen}
         onClose={() => setPreviewModalOpen(false)}
-        onPrint={handlePrintReceipt}
       />
     </div>
   )

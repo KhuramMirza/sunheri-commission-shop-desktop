@@ -56,11 +56,17 @@ export default function ReceiptHeader() {
         </div>
 
         {/* Center: Urdu Shop Title & Tagline */}
-        <div className="text-center px-6 py-3 rounded-2xl bg-slate-950/80 border border-slate-800 shadow-inner">
-          <h2 className="text-3xl md:text-4xl font-black font-urdu text-amber-300 tracking-normal leading-relaxed drop-shadow">
+        <div className="text-center px-8 py-5 rounded-2xl bg-slate-950/90 border border-slate-800 shadow-inner flex flex-col items-center justify-center">
+          <h2
+            className="text-2xl sm:text-3xl font-bold font-urdu text-amber-300 tracking-normal drop-shadow-md select-text"
+            style={{ lineHeight: 2.2 }}
+          >
             سنہری کمیشن شاپ
           </h2>
-          <p className="text-sm md:text-base text-amber-100 font-urdu font-medium mt-1 leading-relaxed">
+          <p
+            className="text-xs sm:text-sm text-amber-100/90 font-urdu font-medium tracking-wide mt-2.5 select-text"
+            style={{ lineHeight: 1.8 }}
+          >
             ہر قسم کی زرعی اجناس کی خرید و فروخت کا با اعتماد ادارہ
           </p>
         </div>

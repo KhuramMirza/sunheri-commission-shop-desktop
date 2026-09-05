@@ -229,20 +229,11 @@ export default function LedgerTable({
                         <button
                           type="button"
                           onClick={() => onPreviewTransaction(t)}
-                          className="p-1.5 rounded-lg bg-slate-800 hover:bg-cyan-500 hover:text-slate-950 text-cyan-300 transition cursor-pointer"
-                          title="Preview Receipt on Screen"
+                          className="p-1.5 rounded-lg bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-amber-300 transition cursor-pointer flex items-center gap-1 text-xs font-sans px-2"
+                          title="View & Print Receipt (رسید دیکھیں اور پرنٹ کریں)"
                         >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                      )}
-                      {onReprintTransaction && (
-                        <button
-                          type="button"
-                          onClick={() => onReprintTransaction(t)}
-                          className="p-1.5 rounded-lg bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-amber-300 transition cursor-pointer"
-                          title="Silent Print Bill"
-                        >
-                          <Printer className="w-4 h-4" />
+                          <Printer className="w-3.5 h-3.5" />
+                          <span>Print</span>
                         </button>
                       )}
                       {onDeleteTransaction && (
@@ -250,7 +241,7 @@ export default function LedgerTable({
                           type="button"
                           onClick={() => onDeleteTransaction(t._id || t.id)}
                           className="p-1.5 rounded-lg bg-slate-800 hover:bg-rose-500 hover:text-white text-slate-400 transition cursor-pointer"
-                          title="Delete Bill"
+                          title="Delete Bill (بل خارج کریں)"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

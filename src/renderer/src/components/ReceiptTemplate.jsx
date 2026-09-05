@@ -33,9 +33,11 @@ export default function ReceiptTemplate({ bill }) {
           <div className="font-black text-sm uppercase">Sunheri Commission Shop</div>
           <div className="text-[10px] font-bold">Ghalla Mandi, Malka Hans (غلہ منڈی ملکہ ہانس)</div>
         </div>
-        <div className="w-1/3 text-center">
-          <div className="font-urdu font-bold text-xl">سنہری کمیشن شاپ</div>
-          <div className="text-[9px] font-urdu">ہر قسم کی زرعی اجناس کی خرید و فروخت کا با اعتماد ادارہ</div>
+        <div className="w-1/3 text-center flex flex-col items-center justify-center">
+          <div className="font-urdu font-black text-2xl leading-relaxed mb-1">سنہری کمیشن شاپ</div>
+          <div className="text-[11px] font-urdu font-bold text-slate-800 leading-normal">
+            ہر قسم کی زرعی اجناس کی خرید و فروخت کا با اعتماد ادارہ
+          </div>
         </div>
         <div className="w-1/3 text-right text-[9px] space-y-0.5">
           <div>حاجی شبیر حسین (صدر): 0300-9696234</div>

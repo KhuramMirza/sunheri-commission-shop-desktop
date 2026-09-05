@@ -35,3 +35,14 @@ Desktop.ini
 # Temp/logs
 *.log
 .eslintcache
+*.dmp
+
+# Database & Local Data
+*.db
+*.db.*
+*.sqlite
+*.sqlite3
+
+# Electron-builder artifacts & test outputs
+*.blockmap
+*.pdf
