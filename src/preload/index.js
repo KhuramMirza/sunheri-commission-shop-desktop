@@ -8,7 +8,10 @@ const api = {
   deleteBill: (id) => ipcRenderer.invoke('db:delete-bill', id),
   getPrinters: () => ipcRenderer.invoke('printer:get-printers'),
   printReceipt: (htmlData, options = {}) => ipcRenderer.invoke('printer:print-receipt', { htmlData, options }),
-  savePdf: (htmlData, fileName) => ipcRenderer.invoke('printer:save-pdf', { htmlData, fileName })
+  savePdf: (htmlData, fileName) => ipcRenderer.invoke('printer:save-pdf', { htmlData, fileName }),
+  getMachineId: () => ipcRenderer.invoke('license:get-machine-id'),
+  getLicenseStatus: () => ipcRenderer.invoke('license:get-status'),
+  activateLicense: (licenseKey) => ipcRenderer.invoke('license:activate', licenseKey)
 }
 
 const electronAPI = {

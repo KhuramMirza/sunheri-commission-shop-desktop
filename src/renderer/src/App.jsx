@@ -3,6 +3,7 @@ import ReceiptHeader from './components/ReceiptHeader'
 import BillForm from './components/BillForm'
 import LedgerTable from './components/LedgerTable'
 import ReceiptPreviewModal from './components/ReceiptPreviewModal'
+import Activation from './components/Activation'
 import { generateReceiptHtml } from './utils/receiptTemplate'
 
 const getTodayDateString = () => {
@@ -14,6 +15,9 @@ const getTodayDateString = () => {
 }
 
 export default function App() {
+  // Software Activation Status: null (checking) | true (activated) | false (unactivated)
+  const [isActivated, setIsActivated] = useState(null)
+
   // Form input state
   const [formData, setFormData] = useState({
     date: getTodayDateString(),
@@ -33,6 +37,26 @@ export default function App() {
   // Receipt Preview Modal State
   const [previewModalOpen, setPreviewModalOpen] = useState(false)
   const [previewBill, setPreviewBill] = useState(null)
+
+  // Check Activation Status on Mount
+  useEffect(() => {
+    async function checkActivation() {
+      try {
+        if (window.api && window.api.getLicenseStatus) {
+          const status = await window.api.getLicenseStatus()
+          setIsActivated(Boolean(status && status.isActivated))
+        } else {
+          const stored = localStorage.getItem('mandi_license')
+          setIsActivated(Boolean(stored && JSON.parse(stored)?.isActivated))
+        }
+      } catch (err) {
+        console.error('Error verifying activation status:', err)
+        setIsActivated(false)
+      }
+    }
+
+    checkActivation()
+  }, [])
 
   // Fetch Next Serial Number from database
   const fetchNextSerialNo = useCallback(async () => {
@@ -68,11 +92,13 @@ export default function App() {
     }
   }, [])
 
-  // Initial load on mount
+  // Initial load on mount once activated
   useEffect(() => {
-    fetchBills()
-    fetchNextSerialNo()
-  }, [fetchBills, fetchNextSerialNo])
+    if (isActivated) {
+      fetchBills()
+      fetchNextSerialNo()
+    }
+  }, [isActivated, fetchBills, fetchNextSerialNo])
 
   // Mathematical Calculations
   const calculations = useMemo(() => {
@@ -237,6 +263,25 @@ export default function App() {
     } catch (err) {
       console.error('Failed to delete transaction:', err)
     }
+  }
+
+  // Loading state while verifying activation status on startup
+  if (isActivated === null) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center font-sans select-none">
+        <div className="flex flex-col items-center gap-3.5 text-amber-400">
+          <span className="w-9 h-9 rounded-full border-3 border-amber-400 border-t-transparent animate-spin" />
+          <span className="text-xs font-mono font-bold tracking-widest text-slate-400 uppercase">
+            Verifying License Status...
+          </span>
+        </div>
+      </div>
+    )
+  }
+
+  // If app is not activated, display the Activation screen
+  if (isActivated === false) {
+    return <Activation onActivated={() => setIsActivated(true)} />
   }
 
   return (

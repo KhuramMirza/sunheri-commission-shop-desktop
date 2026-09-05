@@ -2,6 +2,7 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { dbService } from './db.js'
 import { printReceiptSilently, saveReceiptAsPdf, getSystemPrinters } from './printer.js'
+import { licenseService } from './license.js'
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -46,6 +47,34 @@ app.whenReady().then(() => {
       status: 'online',
       version: app.getVersion(),
       time: new Date().toISOString()
+    }
+  })
+
+  // Hardware Licensing & Activation IPC Handlers
+  ipcMain.handle('license:get-machine-id', async () => {
+    try {
+      return licenseService.getMachineId()
+    } catch (err) {
+      console.error('Error in license:get-machine-id handler:', err)
+      return 'MACHINE-UNKNOWN-ID'
+    }
+  })
+
+  ipcMain.handle('license:get-status', async () => {
+    try {
+      return licenseService.getActivationStatus()
+    } catch (err) {
+      console.error('Error in license:get-status handler:', err)
+      return { isActivated: false }
+    }
+  })
+
+  ipcMain.handle('license:activate', async (_event, licenseKey) => {
+    try {
+      return licenseService.activateLicense(licenseKey)
+    } catch (err) {
+      console.error('Error in license:activate handler:', err)
+      return { success: false, message: err.message }
     }
   })
 
