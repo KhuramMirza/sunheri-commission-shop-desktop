@@ -347,3 +347,32 @@ This document logs the exact technical causes of these issues and the architectu
 | [`src/renderer/src/components/ReceiptTemplate.jsx`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/components/ReceiptTemplate.jsx) | Synchronized Mann/Kg BiDi fix and added POS Software credit bar. |
 | [`src/renderer/src/App.jsx`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/App.jsx) | Added POS Software developer contact footer at bottom of dashboard. |
 
+---
+
+## 13. Issue 9: Urdu-First RTL Voucher Layout, Centered Client Name & Payment Policy Notice
+
+### Requirements
+1. **Person/Client Centering**: On the bill, the person the bill belongs to (`گاہک / زمیندار`) must be prominently centered.
+2. **English Brand Name Update**: Update English name from "Sunheri Commission Shop" to **"Soneri Commission Shop"** across the entire application.
+3. **Urdu-First (RTL) Layout**:
+   - The Gross/Saafi and weight details (`وزن کی تفصیل`) must be placed on the **RIGHT** side of the bill.
+   - The Financials section (`حساب رقم`) must be placed on the **LEFT** side of the bill.
+4. **Payment Clearance Notice**:
+   - Replaced "شکریہ! دوبارہ تشریف لائیں۔" (located on the left side) with:
+     ```
+     پیمنٹ کی ادائیگی 3 سے 4 ہفتوں میں کی جاتی ہے۔
+     (Payment will be made within 3-4 weeks)
+     Soneri Commission Shop • Ghalla Mandi, Malka Hans
+     ```
+   - Signature & pencil note line placed on the **RIGHT** side.
+
+### Solutions Implemented
+- **Receipt Template & Modal Synchronization**:
+  - In [`src/renderer/src/utils/receiptTemplate.js`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/utils/receiptTemplate.js), [`src/renderer/src/components/ReceiptPreviewModal.jsx`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/components/ReceiptPreviewModal.jsx), and [`src/renderer/src/components/ReceiptTemplate.jsx`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/components/ReceiptTemplate.jsx):
+    - Configured `.meta-bar` with `direction: rtl` and centered the client name with bold underline styling between S.No (right) and Date/Time (left).
+    - Configured `.content-grid` with `direction: rtl` so that the Weight Breakdown column renders on the right and the Financials column renders on the left.
+    - Configured `.signature-container` with `direction: rtl` so the Signature area is anchored on the right, while the official payment clearance policy notice (`پیمنٹ کی ادائیگی 3 سے 4 ہفتوں میں کی جاتی ہے۔`) is positioned cleanly on the left.
+- **English Branding Everywhere**:
+  - Updated all references across `package.json`, `electron-builder.yml`, `compile-bytecode.js`, `generate-key.js`, `src/main/index.js`, `src/main/printer.js`, `index.html`, and React components to **"Soneri Commission Shop"**.
+
+

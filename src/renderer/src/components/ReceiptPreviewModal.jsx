@@ -128,7 +128,7 @@ export default function ReceiptPreviewModal({ bill, isOpen, onClose, onPrint }) 
               {/* Left: English Branding & Location */}
               <div className="w-[32%] text-left">
                 <div className="font-black text-sm uppercase tracking-wide text-slate-950">
-                  Sunheri Commission Shop
+                  Soneri Commission Shop
                 </div>
                 <div className="text-[11px] font-bold text-slate-800 mt-0.5">
                   Ghalla Mandi, Malka Hans
@@ -177,28 +177,32 @@ export default function ReceiptPreviewModal({ bill, isOpen, onClose, onPrint }) 
               </div>
             </div>
 
-            {/* Meta Bar */}
-            <div className="flex justify-between items-center bg-slate-100 border border-black rounded px-3 py-1.5 text-xs font-semibold">
-              <div>
+            {/* Meta Bar: Person the bill belongs to in the CENTER */}
+            <div className="flex justify-between items-center bg-slate-100 border border-black rounded px-3 py-1.5 text-xs font-semibold" style={{ direction: 'rtl' }}>
+              <div className="w-1/4 text-right">
                 <span className="font-bold">بل نمبر (S.No):</span>
-                <span className="font-black ml-1.5 text-sm text-slate-950 font-mono">#{serialNo}</span>
+                <span className="font-black mr-1.5 text-sm text-slate-950 font-mono">#{serialNo}</span>
               </div>
-              <div>
-                <span className="font-bold">تاریخ و وقت (Date & Time):</span>
-                <span className="ml-1.5 font-mono">
+              <div className="flex-1 text-center flex items-center justify-center">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-md bg-white border-2 border-black shadow-sm">
+                  <span className="text-xs font-bold text-slate-800">گاہک / زمیندار (Client):</span>
+                  <span className="font-black text-lg md:text-xl text-black underline decoration-black decoration-2 underline-offset-4 tracking-wide">
+                    {clientName}
+                  </span>
+                </div>
+              </div>
+              <div className="w-1/4 text-left" style={{ direction: 'ltr' }}>
+                <span className="font-bold">تاریخ و وقت:</span>
+                <span className="ml-1.5 font-mono text-[11px]">
                   {date} {time}
                 </span>
               </div>
-              <div>
-                <span className="font-bold">گاہک / زمیندار (Client):</span>
-                <span className="font-black ml-1.5 text-sm text-slate-950">{clientName}</span>
-              </div>
             </div>
 
-            {/* Main Content: Wide 2-Column Layout */}
-            <div className="grid grid-cols-12 gap-3.5">
-              {/* Left Column: Weight Breakdown & Net Weight */}
-              <div className="col-span-7 border border-black rounded p-3 flex flex-col justify-between bg-white">
+            {/* Main Content: Wide 2-Column Layout - Urdu First (Right: Wazn/Saafi, Left: Financials) */}
+            <div className="grid grid-cols-12 gap-3.5" style={{ direction: 'rtl' }}>
+              {/* Right Column: Weight Breakdown & Net Weight */}
+              <div className="col-span-7 border border-black rounded p-3 flex flex-col justify-between bg-white text-right">
                 <div>
                   <div className="flex justify-between font-bold text-[11px] uppercase border-b border-black pb-1 mb-2">
                     <span>وزن کی تفصیل (Weight Breakdown)</span>
@@ -207,15 +211,15 @@ export default function ReceiptPreviewModal({ bill, isOpen, onClose, onPrint }) 
                   <div className="space-y-1.5 text-xs">
                     <div className="flex justify-between items-center">
                       <span>صافی وزن (Gross Weight):</span>
-                      <span className="font-bold font-mono text-sm">{saafi} Kg</span>
+                      <span className="font-bold font-mono text-sm" style={{ direction: 'ltr' }}>{saafi} Kg</span>
                     </div>
                     <div className="flex justify-between items-center text-slate-700">
                       <span>باردانہ کٹوتی (Bardana Deduction):</span>
-                      <span className="font-mono text-sm">-{bardana} Kg</span>
+                      <span className="font-mono text-sm" style={{ direction: 'ltr' }}>-{bardana} Kg</span>
                     </div>
                     <div className="flex justify-between items-center text-slate-700">
                       <span>کنڈہ کٹوتی (Kanda Machine Deduction):</span>
-                      <span className="font-mono text-sm">-{kanda} Kg</span>
+                      <span className="font-mono text-sm" style={{ direction: 'ltr' }}>-{kanda} Kg</span>
                     </div>
                   </div>
                 </div>
@@ -224,7 +228,7 @@ export default function ReceiptPreviewModal({ bill, isOpen, onClose, onPrint }) 
                 <div className="bg-slate-100 border border-black rounded p-2.5 mt-2.5">
                   <div className="flex justify-between font-black text-sm text-slate-950 border-b border-slate-400 pb-1">
                     <span>خالص وزن (Net Weight):</span>
-                    <span className="font-mono text-base">{netWeight} Kg</span>
+                    <span className="font-mono text-base" style={{ direction: 'ltr' }}>{netWeight} Kg</span>
                   </div>
                   <div className="flex justify-between items-center font-bold text-xs mt-1.5">
                     <span className="font-urdu">وزن بحساب من:</span>
@@ -238,15 +242,15 @@ export default function ReceiptPreviewModal({ bill, isOpen, onClose, onPrint }) 
                   </div>
                   <div className="flex justify-between text-[10px] text-slate-600 mt-1">
                     <span>(1 Mann = 40.00 Kgs)</span>
-                    <span className="font-mono">
+                    <span className="font-mono" style={{ direction: 'ltr' }}>
                       {totalManns} Manns + {remainingKgs} Kgs
                     </span>
                   </div>
                 </div>
               </div>
 
-              {/* Right Column: Financial Summary */}
-              <div className="col-span-5 border border-black rounded p-3 flex flex-col justify-between bg-slate-50">
+              {/* Left Column: Financial Summary */}
+              <div className="col-span-5 border border-black rounded p-3 flex flex-col justify-between bg-slate-50 text-right">
                 <div>
                   <div className="flex justify-between font-bold text-[11px] uppercase border-b border-black pb-1 mb-2">
                     <span>حساب رقم (Financials)</span>
@@ -255,17 +259,17 @@ export default function ReceiptPreviewModal({ bill, isOpen, onClose, onPrint }) 
                   <div className="space-y-1.5 text-xs">
                     <div className="flex justify-between items-center">
                       <span>ریٹ فی من (Rate / Mann):</span>
-                      <span className="font-bold font-mono text-sm">Rs. {ratePerMann}</span>
+                      <span className="font-bold font-mono text-sm" style={{ direction: 'ltr' }}>Rs. {ratePerMann}</span>
                     </div>
                     <div className="flex justify-between items-center text-slate-700">
                       <span>ریٹ فی کلو (Rate / 1 Kg):</span>
-                      <span className="font-mono text-sm">Rs. {ratePerKg}</span>
+                      <span className="font-mono text-sm" style={{ direction: 'ltr' }}>Rs. {ratePerKg}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Highlighted Total Amount Box */}
-                <div className="border-2 border-black rounded p-2.5 text-center bg-white shadow-sm mt-2.5">
+                <div className="border-2 border-black rounded p-2.5 text-center bg-white shadow-sm mt-2.5" style={{ direction: 'ltr' }}>
                   <div className="font-bold text-[11px] text-slate-800 uppercase tracking-wider">
                     کل رقم (TOTAL BILL)
                   </div>
@@ -279,19 +283,25 @@ export default function ReceiptPreviewModal({ bill, isOpen, onClose, onPrint }) 
               </div>
             </div>
 
-            {/* Bottom Row: Generous Pencil Writing / Signature Space */}
-            <div className="border-t border-black pt-2 flex justify-between items-end gap-6 mt-1">
-              <div className="flex-1">
+            {/* Bottom Row: Urdu First (Right: Signature, Left: Payment Notice) */}
+            <div className="border-t border-black pt-2 flex justify-between items-end gap-6 mt-1" style={{ direction: 'rtl' }}>
+              {/* Right: Generous Pencil Writing / Signature Space */}
+              <div className="flex-1 text-right">
                 <div className="text-[11px] font-bold text-slate-800 mb-6">
                   دستخط یا قلمی نوٹ (Signature / Notes):
                 </div>
                 <div className="border-b border-dashed border-slate-500 w-full" />
               </div>
-              <div className="text-right text-[10px] text-slate-600">
-                <div className="font-urdu font-bold text-xs text-slate-950">
-                  شکریہ! دوبارہ تشریف لائیں۔
+
+              {/* Left: Payment Clearance Policy Notice & Shop Info */}
+              <div className="text-left text-[10px] text-slate-600 min-w-[42%]" style={{ direction: 'ltr' }}>
+                <div className="font-urdu font-bold text-sm text-slate-950" style={{ lineHeight: 1.7, direction: 'rtl', textAlign: 'left' }}>
+                  پیمنٹ کی ادائیگی 3 سے 4 ہفتوں میں کی جاتی ہے۔
                 </div>
-                <div className="mt-0.5">Sunheri Commission Shop • Ghalla Mandi, Malka Hans</div>
+                <div className="text-[10px] text-slate-600 font-medium mt-0.5">
+                  (Payment will be made within 3-4 weeks)
+                </div>
+                <div className="mt-0.5 text-[10px] text-slate-700">Soneri Commission Shop • Ghalla Mandi, Malka Hans</div>
               </div>
             </div>
 

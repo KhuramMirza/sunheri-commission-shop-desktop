@@ -33,7 +33,7 @@ export function generateReceiptHtml(bill) {
 <html lang="ur" dir="ltr">
 <head>
   <meta charset="UTF-8">
-  <title>Receipt #${serialNo} - Sunheri Commission Shop</title>
+  <title>Receipt #${serialNo} - Soneri Commission Shop</title>
   <style>
     @page {
       size: A5 landscape;
@@ -162,7 +162,7 @@ export function generateReceiptHtml(bill) {
       color: #000;
     }
 
-    /* Meta Row */
+    /* Meta Row: Urdu First (Right: S.No, Center: Client Name, Left: Date & Time) */
     .meta-bar {
       display: flex;
       justify-content: space-between;
@@ -170,14 +170,57 @@ export function generateReceiptHtml(bill) {
       background: #f0f0f0;
       border: 1.5px solid #000;
       border-radius: 4px;
-      padding: 1.8mm 3mm;
+      padding: 2mm 3mm;
       margin: 2mm 0;
       font-size: 12.5px;
+      direction: rtl;
     }
-    .meta-item {
+    .meta-item-right {
       display: flex;
       gap: 5px;
       align-items: baseline;
+      width: 25%;
+      text-align: right;
+    }
+    .meta-item-center {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      text-align: center;
+    }
+    .meta-client-box {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: #fff;
+      border: 1.5px solid #000;
+      border-radius: 4px;
+      padding: 1.2mm 4mm;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+    .meta-client-label {
+      font-size: 12px;
+      font-weight: 800;
+      color: #222;
+    }
+    .meta-client {
+      font-size: 19px;
+      font-weight: 900;
+      color: #000;
+      text-decoration: underline;
+      text-decoration-thickness: 2.5px;
+      text-underline-offset: 3px;
+      letter-spacing: 0.5px;
+    }
+    .meta-item-left {
+      display: flex;
+      gap: 5px;
+      align-items: baseline;
+      justify-content: flex-end;
+      width: 28%;
+      direction: ltr;
+      text-align: left;
     }
     .meta-sno {
       font-size: 14px;
@@ -185,17 +228,13 @@ export function generateReceiptHtml(bill) {
       font-family: monospace;
       color: #000;
     }
-    .meta-client {
-      font-size: 13.5px;
-      font-weight: 800;
-      color: #000;
-    }
 
-    /* Main Two-Column Content Grid */
+    /* Main Two-Column Content Grid: Urdu First (RTL: Weight Breakdown on Right, Finance on Left) */
     .content-grid {
       display: flex;
       gap: 3mm;
       margin: 1.5mm 0;
+      direction: rtl;
     }
     .weight-column {
       flex: 1.15;
@@ -203,6 +242,8 @@ export function generateReceiptHtml(bill) {
       border-radius: 4px;
       padding: 2.5mm 3mm;
       background: #fff;
+      direction: rtl;
+      text-align: right;
     }
     .finance-column {
       flex: 1;
@@ -210,6 +251,8 @@ export function generateReceiptHtml(bill) {
       border-radius: 4px;
       padding: 2.5mm 3mm;
       background: #fafafa;
+      direction: rtl;
+      text-align: right;
     }
     .section-title {
       font-size: 11.5px;
@@ -221,6 +264,7 @@ export function generateReceiptHtml(bill) {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      direction: rtl;
     }
     .data-row {
       display: flex;
@@ -228,10 +272,12 @@ export function generateReceiptHtml(bill) {
       align-items: center;
       padding: 1.5px 0;
       font-size: 12.5px;
+      direction: rtl;
     }
     .data-row-num {
       font-family: 'Segoe UI', Tahoma, monospace;
       font-weight: 600;
+      direction: ltr;
     }
     .net-weight-box {
       background: #e8e8e8;
@@ -239,6 +285,7 @@ export function generateReceiptHtml(bill) {
       border-radius: 4px;
       padding: 2mm 2.5mm;
       margin-top: 2.5mm;
+      direction: rtl;
     }
     .net-weight-header {
       display: flex;
@@ -248,6 +295,7 @@ export function generateReceiptHtml(bill) {
       font-weight: 900;
       border-bottom: 1px solid #777;
       padding-bottom: 1mm;
+      direction: rtl;
     }
     .net-weight-manns {
       display: flex;
@@ -256,6 +304,7 @@ export function generateReceiptHtml(bill) {
       font-size: 13.5px;
       font-weight: 800;
       margin-top: 1.5mm;
+      direction: rtl;
     }
     .net-weight-hint {
       display: flex;
@@ -263,6 +312,7 @@ export function generateReceiptHtml(bill) {
       font-size: 10px;
       color: #444;
       margin-top: 1mm;
+      direction: rtl;
     }
 
     /* Financial Column */
@@ -273,6 +323,7 @@ export function generateReceiptHtml(bill) {
       text-align: center;
       background: #fff;
       margin-top: 2.5mm;
+      direction: ltr;
     }
     .total-bill-label {
       font-size: 11px;
@@ -295,7 +346,7 @@ export function generateReceiptHtml(bill) {
       font-weight: 600;
     }
 
-    /* Signature & Manual Notes Section */
+    /* Signature & Manual Notes Section: Urdu First (RTL: Signature on Right, Payment Notice on Left) */
     .signature-container {
       border-top: 1.5px solid #000;
       padding-top: 2mm;
@@ -303,9 +354,12 @@ export function generateReceiptHtml(bill) {
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
+      direction: rtl;
+      gap: 4mm;
     }
     .signature-line-box {
-      width: 62%;
+      flex: 1;
+      text-align: right;
     }
     .signature-text {
       font-size: 11px;
@@ -318,17 +372,30 @@ export function generateReceiptHtml(bill) {
       height: 1px;
     }
     .footer-stamp {
-      width: 35%;
-      text-align: right;
+      min-width: 44%;
+      text-align: left;
+      direction: ltr;
     }
     .footer-greeting {
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 800;
+      color: #000;
+      line-height: 1.6;
+      direction: rtl;
+      text-align: left;
+    }
+    .footer-subtext {
+      font-size: 10px;
+      color: #444;
+      font-weight: 600;
+      margin-top: 1.5px;
+      text-align: left;
     }
     .footer-shop-name {
       font-size: 9px;
       color: #444;
-      margin-top: 1px;
+      margin-top: 2px;
+      text-align: left;
     }
     .mann-display-badge {
       display: inline-flex;
@@ -377,7 +444,7 @@ export function generateReceiptHtml(bill) {
     <div class="header-container">
       <!-- Left: English Title & Location -->
       <div class="header-left">
-        <div class="shop-title-en">Sunheri Commission Shop</div>
+        <div class="shop-title-en">Soneri Commission Shop</div>
         <div class="location-text">Ghalla Mandi, Malka Hans</div>
         <div class="location-text-ur urdu">غلہ منڈی ملکہ ہانس</div>
       </div>
@@ -412,25 +479,27 @@ export function generateReceiptHtml(bill) {
       </div>
     </div>
 
-    <!-- Meta Information Bar -->
+    <!-- Meta Information Bar: Person the bill belongs to in the CENTER -->
     <div class="meta-bar">
-      <div class="meta-item">
+      <div class="meta-item-right">
         <span class="bold">بل نمبر (S.No):</span>
         <span class="meta-sno">#${serialNo}</span>
       </div>
-      <div class="meta-item">
-        <span class="bold">تاریخ و وقت (Date & Time):</span>
-        <span>${date} ${time}</span>
+      <div class="meta-item-center">
+        <div class="meta-client-box">
+          <span class="meta-client-label">گاہک / زمیندار (Client):</span>
+          <span class="meta-client">${clientName}</span>
+        </div>
       </div>
-      <div class="meta-item">
-        <span class="bold">گاہک / زمیندار (Client):</span>
-        <span class="meta-client">${clientName}</span>
+      <div class="meta-item-left">
+        <span class="bold">تاریخ و وقت:</span>
+        <span style="font-family: monospace;">${date} ${time}</span>
       </div>
     </div>
 
-    <!-- Main Content Columns -->
+    <!-- Main Content Columns: Urdu First (Right: Wazn/Saafi Details, Left: Financials) -->
     <div class="content-grid">
-      <!-- Column 1: Weight Deductions & Net Weight -->
+      <!-- Column 1: Weight Deductions & Net Weight (On the RIGHT) -->
       <div class="weight-column">
         <div class="section-title">
           <span>وزن کی تفصیل (Weight Breakdown)</span>
@@ -467,12 +536,12 @@ export function generateReceiptHtml(bill) {
           </div>
           <div class="net-weight-hint">
             <span>(1 Mann = 40.00 Kgs)</span>
-            <span style="font-family: monospace;">${totalManns} Manns + ${remainingKgs} Kgs</span>
+            <span style="font-family: monospace; direction: ltr;">${totalManns} Manns + ${remainingKgs} Kgs</span>
           </div>
         </div>
       </div>
 
-      <!-- Column 2: Financial Calculation & Total Amount -->
+      <!-- Column 2: Financial Calculation & Total Amount (On the LEFT) -->
       <div class="finance-column">
         <div class="section-title">
           <span>حساب رقم (Financial Summary)</span>
@@ -498,7 +567,7 @@ export function generateReceiptHtml(bill) {
       </div>
     </div>
 
-    <!-- Signature & Manual Notes Area -->
+    <!-- Signature & Manual Notes Area: Urdu First (Right: Signature, Left: Payment Notice) -->
     <div class="signature-container">
       <div class="signature-line-box">
         <div class="signature-text">
@@ -507,8 +576,9 @@ export function generateReceiptHtml(bill) {
         <div class="signature-underline"></div>
       </div>
       <div class="footer-stamp">
-        <div class="urdu footer-greeting">شکریہ! دوبارہ تشریف لائیں۔</div>
-        <div class="footer-shop-name">Sunheri Commission Shop • Ghalla Mandi, Malka Hans</div>
+        <div class="urdu footer-greeting">پیمنٹ کی ادائیگی 3 سے 4 ہفتوں میں کی جاتی ہے۔</div>
+        <div class="footer-subtext">(Payment will be made within 3-4 weeks)</div>
+        <div class="footer-shop-name">Soneri Commission Shop • Ghalla Mandi, Malka Hans</div>
       </div>
     </div>
 

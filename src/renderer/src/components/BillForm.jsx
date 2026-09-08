@@ -97,7 +97,7 @@ export default function BillForm({
             value={formData.clientName}
             onChange={onInputChange}
             placeholder="Client Name (گاہک کا نام)"
-            className="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 outline-none transition"
+            className="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 rounded-xl px-3.5 py-2.5 text-base font-bold text-amber-200 placeholder:text-slate-500 placeholder:font-normal outline-none transition"
           />
         </div>
 

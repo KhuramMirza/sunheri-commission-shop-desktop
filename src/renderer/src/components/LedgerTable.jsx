@@ -214,7 +214,7 @@ export default function LedgerTable({
                   <td className="py-2.5 px-3.5 text-slate-300 font-sans text-xs whitespace-nowrap">
                     {t.date}
                   </td>
-                  <td className="py-2.5 px-3.5 font-bold text-white font-sans text-xs md:text-sm">
+                  <td className="py-2.5 px-3.5 font-black text-amber-200 font-sans text-xs md:text-sm">
                     {t.clientName || 'Cash Client'}
                   </td>
                   <td className="py-2.5 px-3.5 text-right font-medium">

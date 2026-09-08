@@ -30,7 +30,7 @@ export default function ReceiptTemplate({ bill }) {
       {/* Header */}
       <div className="flex justify-between items-center pb-2 border-b-2 border-black">
         <div className="w-1/3 text-left">
-          <div className="font-black text-sm uppercase">Sunheri Commission Shop</div>
+          <div className="font-black text-sm uppercase">Soneri Commission Shop</div>
           <div className="text-[10px] font-bold">Ghalla Mandi, Malka Hans (غلہ منڈی ملکہ ہانس)</div>
         </div>
         <div className="w-1/3 text-center flex flex-col items-center justify-center">
@@ -46,33 +46,39 @@ export default function ReceiptTemplate({ bill }) {
         </div>
       </div>
 
-      {/* Meta */}
-      <div className="flex justify-between items-center bg-gray-100 border border-black rounded px-3 py-1 my-2 text-xs font-bold">
-        <span>بل نمبر (S.No): #{serialNo}</span>
-        <span>تاریخ (Date): {date}</span>
-        <span>گاہک (Client): {clientName}</span>
+      {/* Meta Bar: Person the bill belongs to in the CENTER */}
+      <div className="flex justify-between items-center bg-gray-100 border border-black rounded px-3 py-1 my-2 text-xs font-bold" style={{ direction: 'rtl' }}>
+        <span className="w-1/4 text-right">بل نمبر (S.No): #{serialNo}</span>
+        <div className="flex-1 text-center flex items-center justify-center">
+          <div className="inline-flex items-center gap-2 px-3 py-0.5 bg-white border-2 border-black rounded">
+            <span className="text-xs font-bold text-gray-800">گاہک / زمیندار (Client):</span>
+            <span className="text-lg font-black text-black underline decoration-2 underline-offset-4 tracking-wide">{clientName}</span>
+          </div>
+        </div>
+        <span className="w-1/4 text-left" style={{ direction: 'ltr' }}>تاریخ: {date}</span>
       </div>
 
-      {/* Content */}
-      <div className="grid grid-cols-2 gap-4 my-2">
-        <div className="border border-black rounded p-2">
+      {/* Content: Urdu First (Right: Weights, Left: Financials) */}
+      <div className="grid grid-cols-2 gap-4 my-2" style={{ direction: 'rtl' }}>
+        {/* Right Column: Weight Deductions & Net Weight */}
+        <div className="border border-black rounded p-2 text-right">
           <div className="font-bold border-b border-black pb-1 mb-1">وزن کی تفصیل (Weights)</div>
           <div className="flex justify-between">
             <span>صافی وزن (Gross):</span>
-            <span className="font-bold">{saafi} Kg</span>
+            <span className="font-bold" style={{ direction: 'ltr' }}>{saafi} Kg</span>
           </div>
           <div className="flex justify-between text-gray-700">
             <span>باردانہ کٹوتی (Bardana):</span>
-            <span>-{bardana} Kg</span>
+            <span style={{ direction: 'ltr' }}>-{bardana} Kg</span>
           </div>
           <div className="flex justify-between text-gray-700">
             <span>کنڈہ کٹوتی (Kanda):</span>
-            <span>-{kanda} Kg</span>
+            <span style={{ direction: 'ltr' }}>-{kanda} Kg</span>
           </div>
           <div className="border-t border-black pt-1 mt-1 font-bold">
             <div className="flex justify-between">
               <span>خالص وزن (Net Weight):</span>
-              <span>{netWeight} Kg</span>
+              <span style={{ direction: 'ltr' }}>{netWeight} Kg</span>
             </div>
             <div className="flex justify-between items-center text-xs mt-0.5">
               <span>وزن بحساب من:</span>
@@ -87,34 +93,38 @@ export default function ReceiptTemplate({ bill }) {
           </div>
         </div>
 
-        <div className="border border-black rounded p-2 flex flex-col justify-between bg-gray-50">
+        {/* Left Column: Financials */}
+        <div className="border border-black rounded p-2 flex flex-col justify-between bg-gray-50 text-right">
           <div>
             <div className="font-bold border-b border-black pb-1 mb-1">حساب رقم (Financials)</div>
             <div className="flex justify-between">
               <span>ریٹ فی من (Rate/Mann):</span>
-              <span className="font-bold">Rs. {ratePerMann}</span>
+              <span className="font-bold" style={{ direction: 'ltr' }}>Rs. {ratePerMann}</span>
             </div>
             <div className="flex justify-between text-gray-700">
               <span>ریٹ فی کلو (Rate/Kg):</span>
-              <span>Rs. {ratePerKg}</span>
+              <span style={{ direction: 'ltr' }}>Rs. {ratePerKg}</span>
             </div>
           </div>
-          <div className="border-2 border-black rounded p-2 text-center bg-white">
+          <div className="border-2 border-black rounded p-2 text-center bg-white" style={{ direction: 'ltr' }}>
             <div className="font-bold text-xs">کل رقم (TOTAL BILL)</div>
             <div className="font-black text-lg">Rs. {totalBill}</div>
           </div>
         </div>
       </div>
 
-      {/* Signature */}
-      <div className="border-t border-black pt-2 flex justify-between items-end mt-4">
-        <div className="w-2/3">
+      {/* Bottom: Urdu First (Right: Signature, Left: Payment Notice) */}
+      <div className="border-t border-black pt-2 flex justify-between items-end mt-4" style={{ direction: 'rtl' }}>
+        <div className="flex-1 text-right">
           <div className="text-[11px] font-bold mb-6">دستخط یا قلمی نوٹ (Signature / Notes):</div>
           <div className="border-b border-dashed border-gray-600 w-full" />
         </div>
-        <div className="text-right text-[10px]">
-          <div className="font-urdu font-bold">شکریہ! دوبارہ تشریف لائیں۔</div>
-          <div>Sunheri Commission Shop</div>
+        <div className="text-left text-[10px] min-w-[42%]" style={{ direction: 'ltr' }}>
+          <div className="font-urdu font-bold text-xs text-black" style={{ direction: 'rtl', textAlign: 'left' }}>
+            پیمنٹ کی ادائیگی 3 سے 4 ہفتوں میں کی جاتی ہے۔
+          </div>
+          <div className="text-[9px] text-gray-600 mt-0.5">(Payment will be made within 3-4 weeks)</div>
+          <div className="mt-0.5 text-gray-700">Soneri Commission Shop • Ghalla Mandi, Malka Hans</div>
         </div>
       </div>
 
