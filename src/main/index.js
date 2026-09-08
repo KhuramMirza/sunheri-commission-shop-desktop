@@ -22,7 +22,7 @@ function createWindow() {
     minHeight: 700,
     show: false,
     autoHideMenuBar: true,
-    title: 'Sunheri Commission Shop (سنہری کمیشن شاپ)',
+    title: 'Soneri Commission Shop (سنہری کمیشن شاپ)',
     webPreferences: {
       preload: preloadPath,
       sandbox: false,

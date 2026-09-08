@@ -322,7 +322,7 @@ export default function App() {
       {/* 5. Bottom System Footer & POS Software Credits */}
       <footer className="mt-4 pt-3 pb-2 border-t border-slate-800/80 flex flex-wrap justify-between items-center gap-2 text-xs text-slate-500">
         <div>
-          Sunheri Commission Shop (سنہری کمیشن شاپ) • Ghalla Mandi, Malka Hans
+          Soneri Commission Shop (سنہری کمیشن شاپ) • Ghalla Mandi, Malka Hans
         </div>
         <div className="flex items-center gap-2">
           <span>POS Software: <strong className="text-slate-300">Easy Solutions</strong></span>

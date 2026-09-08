@@ -45,7 +45,7 @@ export default function ReceiptHeader() {
           <div>
             <div className="flex items-center gap-3 justify-center lg:justify-start">
               <h1 className="text-2xl md:text-3xl font-black text-amber-400 tracking-wide uppercase drop-shadow">
-                Sunheri Commission Shop
+                Soneri Commission Shop
               </h1>
             </div>
             <p className="text-sm text-slate-300 flex items-center justify-center lg:justify-start gap-1.5 font-medium mt-1">

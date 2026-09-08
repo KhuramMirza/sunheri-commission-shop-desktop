@@ -128,7 +128,7 @@ export default function Activation({ onActivated }) {
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-black text-amber-400 tracking-wide uppercase">
-            Sunheri Commission Shop
+            Soneri Commission Shop
           </h1>
 
           {/* Urdu Title & Tagline with generous line-height */}

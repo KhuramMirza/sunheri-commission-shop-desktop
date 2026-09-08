@@ -2,7 +2,7 @@
   "name": "mandi-commission-shop",
   "version": "1.0.0",
   "type": "module",
-  "description": "Offline Desktop App for Mandi Commission Shop (Sunheri Commission Shop)",
+  "description": "Offline Desktop App for Mandi Commission Shop (Soneri Commission Shop)",
   "main": "./out/main/entry.cjs",
   "author": "Mandi Commission Shop",
   "scripts": {

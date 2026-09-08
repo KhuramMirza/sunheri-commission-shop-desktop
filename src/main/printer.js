@@ -52,7 +52,7 @@ export async function printReceiptSilently(htmlContent, options = {}) {
       show: !isSilent,
       width: 850,
       height: 650,
-      title: 'Print Receipt - Sunheri Commission Shop',
+      title: 'Print Receipt - Soneri Commission Shop',
       autoHideMenuBar: true,
       webPreferences: {
         nodeIntegration: false,

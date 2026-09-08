@@ -1,5 +1,5 @@
 /**
- * Standalone License Key Generator for Sunheri Commission Shop
+ * Standalone License Key Generator for Soneri Commission Shop
  * -----------------------------------------------------------
  * Run this script on your own developer machine (NOT in the Electron app).
  * 
@@ -68,7 +68,7 @@ export function generateLicenseKey(machineId, expiryDate, privateKey) {
     machineId: machineId.trim(),
     expiryDate: expiryDate || 'never',
     issuedAt: new Date().toISOString(),
-    issuer: 'Sunheri Commission Shop (Ghalla Mandi, Malka Hans)'
+    issuer: 'Soneri Commission Shop (Ghalla Mandi, Malka Hans)'
   }
 
   // Base64 encode payload
@@ -137,7 +137,7 @@ function promptQuestion(query) {
  */
 async function main() {
   console.log('===============================================================')
-  console.log('       Sunheri Commission Shop - RSA License Key Generator     ')
+  console.log('       Soneri Commission Shop - RSA License Key Generator     ')
   console.log('===============================================================\n')
 
   const { privateKey, publicKey, isNew } = getOrCreateKeyPair()

@@ -1,6 +1,6 @@
-appId: com.sunheri.mandibilling
-productName: Sunheri Commission Shop
-copyright: Copyright © 2026 Sunheri Commission Shop
+appId: com.soneri.mandibilling
+productName: Soneri Commission Shop
+copyright: Copyright © 2026 Soneri Commission Shop
 
 directories:
   output: dist
@@ -28,7 +28,7 @@ nsis:
   deleteAppDataOnUninstall: false
   createDesktopShortcut: always
   createStartMenuShortcut: true
-  shortcutName: Sunheri Commission Shop
+  shortcutName: Soneri Commission Shop
   installerLanguages:
     - en_US
   artifactName: ${productName}-Setup-${version}.${ext}
