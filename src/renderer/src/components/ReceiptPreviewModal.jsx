@@ -158,9 +158,11 @@ export default function ReceiptPreviewModal({ bill, isOpen, onClose, onPrint }) 
 
               {/* Right: Contacts */}
               <div className="w-[30%] text-right text-[10px] space-y-0.5">
-                <div className="flex justify-between">
-                  <span className="text-slate-700">حاجی شبیر حسین (صدر):</span>
-                  <span className="font-bold font-mono">0300-9696234</span>
+                <div className="flex justify-between font-black text-black">
+                  <span className="font-black text-black">
+                    <strong>حاجی شبیر حسین (صدر):</strong>
+                  </span>
+                  <span className="font-black font-mono text-black">0300-9696234</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-700">حاجی فقیر حسین:</span>

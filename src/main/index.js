@@ -15,6 +15,17 @@ function createWindow() {
       ? preloadJs
       : preloadMjs
 
+  const iconCandidates = [
+    join(__dirname, '../../build/icon.png'),
+    join(__dirname, '../../build/icon.ico'),
+    join(__dirname, '../../src/renderer/src/assets/mandi_logo.png'),
+    join(app.getAppPath(), 'build/icon.png'),
+    join(app.getAppPath(), 'build/icon.ico'),
+    join(process.resourcesPath, 'build/icon.png'),
+    join(process.resourcesPath, 'build/icon.ico')
+  ]
+  const appIcon = iconCandidates.find((p) => fs.existsSync(p))
+
   const mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
@@ -23,6 +34,7 @@ function createWindow() {
     show: false,
     autoHideMenuBar: true,
     title: 'Soneri Commission Shop (سنہری کمیشن شاپ)',
+    icon: appIcon,
     webPreferences: {
       preload: preloadPath,
       sandbox: false,

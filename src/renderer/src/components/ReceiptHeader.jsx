@@ -87,27 +87,61 @@ export default function ReceiptHeader() {
 
       {/* 4 Contacts Bar - Clear & Larger Typography */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-4">
-        {contacts.map((c, idx) => (
-          <div
-            key={idx}
-            className="flex items-center gap-3 bg-slate-950/80 border border-slate-800 hover:border-amber-500/40 rounded-xl p-3 transition-all"
-          >
-            <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400 shrink-0">
-              <Phone className="w-4 h-4" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-200 truncate">{c.name}</span>
+        {contacts.map((c, idx) => {
+          const isSadar = idx === 0 || c.nameUrdu.includes('صدر')
+          return (
+            <div
+              key={idx}
+              className={`flex items-center gap-3 bg-slate-950/80 border rounded-xl p-3 transition-all ${
+                isSadar
+                  ? 'border-amber-400/70 ring-2 ring-amber-400/25 bg-slate-950 shadow-lg shadow-amber-950/30'
+                  : 'border-slate-800 hover:border-amber-500/40'
+              }`}
+            >
+              <div
+                className={`p-2 rounded-lg shrink-0 ${
+                  isSadar
+                    ? 'bg-amber-400 text-slate-950 font-black shadow-md'
+                    : 'bg-amber-500/10 text-amber-400'
+                }`}
+              >
+                <Phone className="w-4 h-4" />
               </div>
-              <div className="flex items-center justify-between gap-1 mt-1">
-                <span className="text-xs text-amber-400 font-mono font-black tracking-tight">
-                  {c.phone}
-                </span>
-                <span className="text-xs text-slate-400 font-urdu truncate">{c.nameUrdu}</span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between">
+                  <span
+                    className={`text-xs truncate ${
+                      isSadar
+                        ? 'font-black text-amber-300 text-[13px] tracking-tight'
+                        : 'font-bold text-slate-200'
+                    }`}
+                  >
+                    {c.name}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-1 mt-1">
+                  <span
+                    className={`text-xs font-mono tracking-tight ${
+                      isSadar ? 'text-amber-300 font-black text-xs' : 'text-amber-400 font-black'
+                    }`}
+                  >
+                    {c.phone}
+                  </span>
+                  {isSadar ? (
+                    <span className="text-xs font-urdu font-black text-amber-300 truncate">
+                      <strong>حاجی شبیر حسین</strong>{' '}
+                      <strong className="text-amber-400 font-black underline decoration-amber-400 decoration-2 underline-offset-2">
+                        (صدر)
+                      </strong>
+                    </span>
+                  ) : (
+                    <span className="text-xs text-slate-400 font-urdu truncate">{c.nameUrdu}</span>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

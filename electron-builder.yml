@@ -9,10 +9,13 @@ directories:
 files:
   - out/**/*
   - package.json
+  - build/icon.png
+  - build/icon.ico
 
 asar: true
 
 win:
+  icon: build/icon.ico
   target:
     - target: nsis
       arch:
@@ -29,6 +32,8 @@ nsis:
   createDesktopShortcut: always
   createStartMenuShortcut: true
   shortcutName: Soneri Commission Shop
+  installerIcon: build/icon.ico
+  uninstallerIcon: build/icon.ico
   installerLanguages:
     - en_US
   artifactName: ${productName}-Setup-${version}.${ext}

@@ -375,4 +375,140 @@ This document logs the exact technical causes of these issues and the architectu
 - **English Branding Everywhere**:
   - Updated all references across `package.json`, `electron-builder.yml`, `compile-bytecode.js`, `generate-key.js`, `src/main/index.js`, `src/main/printer.js`, `index.html`, and React components to **"Soneri Commission Shop"**.
 
+---
+
+## 14. Issue 10: Two-Page PDF Splitting / Overflow onto Page 2
+
+### Symptoms Observed
+- Exporting or saving the receipt as a PDF resulted in a **2-page document**:
+  - **Page 1**: Contained all header, client details, weight calculations, financial summary, and signature area.
+  - **Page 2**: Contained only the single bottom credit bar:
+    `POS Software: Easy Solutions | رابطہ برائے کمپیوٹر سافٹ ویئر: 0315-6566533 | Contact: 0315-6566533`.
+  - On Page 1, the Date & Time label also wrapped onto two lines (`تاریخ و\n:وقت` and `2026-09-08 10:06\nPM`), consuming unnecessary vertical space.
+
+### Root Cause Analysis
+1. **Vertical Height Calculation Overrun**:
+   - Standard **A5 Landscape** page dimensions are `210mm` (width) × `148.5mm` (height).
+   - The `@page` CSS rule was set to `margin: 6mm 8mm`, leaving only `148.5mm - 12mm = 136.5mm` of printable vertical height.
+   - The combined vertical height of the logo (`58px`), two-line tagline wrap, wrapped date/time box, signature space (`6mm`), and container paddings pushed the card height to `~138.5mm`.
+   - Because `138.5mm > 136.5mm` (an overflow of just ~2mm), Chromium's layout engine automatically broke the page immediately before the `.software-credits-bar`, ejecting it onto Page 2.
+2. **BiDi Inline Text Wrapping**:
+   - In `.meta-bar` (which has `direction: rtl`), `.meta-item-left` contained mixed RTL/LTR text without `white-space: nowrap`, causing `تاریخ و وقت:` to line-break into `تاریخ و` and `:وقت`.
+
+### Solutions Implemented
+1. **Optimized `@page` and Container Geometry** ([`src/renderer/src/utils/receiptTemplate.js`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/utils/receiptTemplate.js)):
+   - Reduced `@page` margins from `6mm 8mm` to `3mm 5mm`, unlocking an extra `6mm` of vertical printable space.
+   - Applied strict page-break suppression:
+     ```css
+     html, body {
+       width: 100%;
+       max-width: 200mm;
+       max-height: 142mm;
+       margin: 0 auto;
+       padding: 0;
+       overflow: hidden;
+       page-break-inside: avoid;
+       break-inside: avoid;
+       page-break-after: avoid;
+     }
+     ```
+   - Reduced outer voucher card padding to `2mm 3.5mm` with `break-inside: avoid;`.
+2. **Vertical Space Compacting**:
+   - Scaled emblem logo from `58px` down to `44px`.
+   - Widened `.header-center` to `44%` and set `.tagline-ur { white-space: nowrap; font-size: 10px; }` so the entire tagline stays on a single line.
+   - Set `.meta-item-right`, `.meta-item-left` to `flex: 0 0 auto; white-space: nowrap;` and `.meta-item-center` to `flex: 1;` so date and time stay strictly on one line (`تاریخ و وقت: 2026-09-08 10:06 PM`).
+   - Adjusted signature bottom margin from `6mm` to `3.5mm`.
+   - Total rendered height is now ~90mm, providing ~50mm of safety margin within the 142.5mm printable boundary.
+3. **Electron PDF Export Hard-Lock** ([`src/main/printer.js`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/main/printer.js)):
+   - Added `pageRanges: '1'` to `webContents.printToPDF` in `saveReceiptAsPdf`:
+     ```javascript
+     const pdfBuffer = await pdfWindow.webContents.printToPDF({
+       printBackground: true,
+       landscape: true,
+       pageSize: 'A5',
+       margins: { marginType: 'none' },
+       pageRanges: '1'
+     })
+     ```
+   - Guarantees that Chromium's PDF generator will never produce more than 1 page.
+
+---
+
+## 15. Issue 11: Soneri Mandi Logo Application Icon for Windows Executable, Desktop Shortcut, and NSIS Installer
+
+### Requirements
+- Embed the authentic **Soneri Commission Shop** emblem logo into:
+  1. The standalone generated `.exe` file (`Soneri Commission Shop.exe`).
+  2. The NSIS installer package (`Soneri Commission Shop-Setup-1.0.0.exe`).
+  3. The Windows Desktop shortcut, Start Menu shortcut, and taskbar.
+  4. The uninstaller executable and Windows "Installed Apps" list.
+
+### Implementation
+1. **Icon Asset Generation** ([`generate-icon.js`](file:///d:/client_projects/sunheri-commission-shop-desktop/generate-icon.js)):
+   - Generated high-resolution Windows icon assets directly from the 1024×1024 source logo ([`src/renderer/src/assets/mandi_logo.png`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/assets/mandi_logo.png)):
+     - [`build/icon.png`](file:///d:/client_projects/sunheri-commission-shop-desktop/build/icon.png): Master 1024×1024 PNG for Electron packaging.
+     - [`build/icon.ico`](file:///d:/client_projects/sunheri-commission-shop-desktop/build/icon.ico): Full multi-resolution Windows Icon file containing 256×256, 128×128, 64×64, 48×48, 32×32, and 16×16 mipmaps.
+2. **Builder Configuration** ([`electron-builder.yml`](file:///d:/client_projects/sunheri-commission-shop-desktop/electron-builder.yml)):
+   - Configured `win.icon: build/icon.ico`.
+   - Configured `nsis.installerIcon: build/icon.ico`.
+   - Configured `nsis.uninstallerIcon: build/icon.ico`.
+   - Included `build/icon.png` and `build/icon.ico` in packaged `files`.
+3. **Electron Main Process & Window** ([`src/main/index.js`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/main/index.js)):
+   - Passed resolved `appIcon` directly to `new BrowserWindow({ icon: appIcon, ... })` to ensure titlebar and taskbar icons are active in development and production runtime.
+4. **HTML Favicon** ([`src/renderer/index.html`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/index.html)):
+   - Added `<link rel="icon" type="image/png" href="./src/assets/mandi_logo.png" />`.
+
+---
+
+## 16. Issue 12: Bold Sadar Name & Sadar Text on Bills and POS Dashboard
+
+### Requirements
+- Make the name and title of the President / Sadar (**حاجی شبیر حسین (صدر)**) bold, prominent, and distinct on:
+  1. The printed thermal/A5 landscape bill voucher and exported PDF.
+  2. The on-screen receipt preview modal.
+  3. The top static shop header on the main POS dashboard.
+
+### Solutions Implemented
+1. **Printed Receipt & PDF Template** ([`src/renderer/src/utils/receiptTemplate.js`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/utils/receiptTemplate.js)):
+   - Added dedicated `.contact-row-sadar`, `.contact-name-sadar`, and `.contact-phone-sadar` CSS rules:
+     ```css
+     .contact-row-sadar {
+       font-weight: 900;
+       color: #000;
+     }
+     .contact-name-sadar {
+       font-size: 9.5px;
+       font-weight: 900;
+       color: #000;
+       white-space: nowrap;
+     }
+     .contact-phone-sadar {
+       font-weight: 900;
+       font-family: 'Segoe UI', Tahoma, monospace;
+       color: #000;
+       direction: ltr;
+       white-space: nowrap;
+     }
+     ```
+   - Wrapped Sadar entry with `<strong>`:
+     ```html
+     <div class="contact-row contact-row-sadar">
+       <span class="contact-name-sadar bold"><strong>حاجی شبیر حسین (صدر):</strong></span>
+       <span class="contact-phone-sadar"><strong>0300-9696234</strong></span>
+     </div>
+     ```
+2. **POS Header Bar** ([`src/renderer/src/components/ReceiptHeader.jsx`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/components/ReceiptHeader.jsx)):
+   - Enhanced the Sadar card with amber border (`border-amber-400/70`), golden ring glow (`ring-2 ring-amber-400/25`), and solid golden phone badge.
+   - Bolds English name (`font-black text-amber-300`).
+   - Bolds Urdu name and highlights the Sadar text (`(صدر)`) with a bold underline:
+     ```jsx
+     <span className="text-xs font-urdu font-black text-amber-300 truncate">
+       <strong>حاجی شبیر حسین</strong>{' '}
+       <strong className="text-amber-400 font-black underline decoration-amber-400 decoration-2 underline-offset-2">
+         (صدر)
+       </strong>
+     </span>
+     ```
+3. **Receipt Preview Modal & Fallback Template** ([`src/renderer/src/components/ReceiptPreviewModal.jsx`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/components/ReceiptPreviewModal.jsx), [`src/renderer/src/components/ReceiptTemplate.jsx`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/components/ReceiptTemplate.jsx)):
+   - Synchronized the bold styling on the Sadar contact entry.
 

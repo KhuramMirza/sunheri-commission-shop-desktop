@@ -40,7 +40,7 @@ export default function ReceiptTemplate({ bill }) {
           </div>
         </div>
         <div className="w-1/3 text-right text-[9px] space-y-0.5">
-          <div>حاجی شبیر حسین (صدر): 0300-9696234</div>
+          <div className="font-black text-black"><strong>حاجی شبیر حسین (صدر): 0300-9696234</strong></div>
           <div>حاجی فقیر حسین: 0302-6535403</div>
           <div>چوہدری سمیع: 0303-4884306 | چوہدری بلال: 0309-9692044</div>
         </div>

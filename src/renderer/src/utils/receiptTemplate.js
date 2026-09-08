@@ -37,25 +37,30 @@ export function generateReceiptHtml(bill) {
   <style>
     @page {
       size: A5 landscape;
-      margin: 6mm 8mm;
+      margin: 3mm 5mm;
     }
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
-    body {
+    html, body {
       width: 100%;
-      max-width: 194mm;
+      max-width: 200mm;
+      max-height: 142mm;
       margin: 0 auto;
       padding: 0;
+      overflow: hidden;
       font-family: 'Segoe UI', Tahoma, -apple-system, BlinkMacSystemFont, 'Noto Nastaliq Urdu', 'Noto Sans Arabic', sans-serif;
-      font-size: 12.5px;
-      line-height: 1.35;
+      font-size: 12px;
+      line-height: 1.28;
       color: #000;
       background: #fff;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
+      page-break-inside: avoid;
+      break-inside: avoid;
+      page-break-after: avoid;
     }
     .urdu {
       font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', 'Urdu Typesetting', Tahoma, sans-serif;
@@ -68,9 +73,12 @@ export function generateReceiptHtml(bill) {
     /* Outer Voucher Card */
     .voucher-card {
       border: 2px solid #000;
-      border-radius: 6px;
-      padding: 3mm 4mm;
+      border-radius: 5px;
+      padding: 2mm 3.5mm;
       background: #fff;
+      page-break-inside: avoid;
+      break-inside: avoid;
+      page-break-after: avoid;
     }
 
     /* Header Styles */
@@ -78,34 +86,34 @@ export function generateReceiptHtml(bill) {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-bottom: 2.5mm;
+      padding-bottom: 1.8mm;
       border-bottom: 2px solid #000;
-      gap: 3mm;
+      gap: 2.5mm;
     }
     .header-left {
-      width: 32%;
+      width: 28%;
       text-align: left;
     }
     .shop-title-en {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 900;
       letter-spacing: 0.5px;
       text-transform: uppercase;
-      line-height: 1.2;
+      line-height: 1.15;
     }
     .location-text {
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 700;
       color: #222;
-      margin-top: 2px;
-    }
-    .location-text-ur {
-      font-size: 11px;
-      color: #333;
       margin-top: 1px;
     }
+    .location-text-ur {
+      font-size: 10.5px;
+      color: #333;
+      margin-top: 0.5px;
+    }
     .header-center {
-      width: 38%;
+      width: 44%;
       text-align: center;
       display: flex;
       flex-direction: column;
@@ -116,50 +124,72 @@ export function generateReceiptHtml(bill) {
       display: flex;
       justify-content: center;
       align-items: center;
-      margin-bottom: 2px;
+      margin-bottom: 1px;
     }
     .mandi-voucher-logo {
-      width: 58px;
-      height: 58px;
+      width: 44px;
+      height: 44px;
       object-fit: contain;
       display: block;
       margin: 0 auto;
     }
     .shop-title-ur {
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 900;
-      line-height: 1.9;
-      margin-bottom: 4px;
+      line-height: 1.5;
+      margin-bottom: 1px;
       padding-bottom: 1px;
       display: block;
       color: #000;
     }
     .tagline-ur {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
       color: #111;
-      line-height: 1.6;
+      line-height: 1.35;
       display: block;
+      white-space: nowrap;
     }
     .header-right {
-      width: 30%;
-      font-size: 10px;
+      width: 28%;
+      font-size: 9.5px;
       text-align: right;
+      direction: rtl;
     }
     .contact-row {
       display: flex;
       justify-content: space-between;
-      margin: 1.5px 0;
+      margin: 1px 0;
       line-height: 1.2;
     }
+    .contact-row-sadar {
+      font-weight: 900;
+      color: #000;
+    }
     .contact-name {
-      font-size: 9.5px;
+      font-size: 9px;
       color: #333;
+      white-space: nowrap;
+    }
+    .contact-name-sadar {
+      font-size: 9.5px;
+      font-weight: 900;
+      color: #000;
+      white-space: nowrap;
     }
     .contact-phone {
       font-weight: 800;
       font-family: 'Segoe UI', Tahoma, monospace;
       color: #000;
+      direction: ltr;
+      white-space: nowrap;
+    }
+    .contact-phone-sadar {
+      font-weight: 900;
+      font-family: 'Segoe UI', Tahoma, monospace;
+      color: #000;
+      direction: ltr;
+      white-space: nowrap;
     }
 
     /* Meta Row: Urdu First (Right: S.No, Center: Client Name, Left: Date & Time) */
@@ -170,17 +200,18 @@ export function generateReceiptHtml(bill) {
       background: #f0f0f0;
       border: 1.5px solid #000;
       border-radius: 4px;
-      padding: 2mm 3mm;
-      margin: 2mm 0;
-      font-size: 12.5px;
+      padding: 1.2mm 2.5mm;
+      margin: 1.5mm 0;
+      font-size: 12px;
       direction: rtl;
     }
     .meta-item-right {
       display: flex;
       gap: 5px;
-      align-items: baseline;
+      align-items: center;
       width: 25%;
       text-align: right;
+      white-space: nowrap;
     }
     .meta-item-center {
       display: flex;
@@ -192,38 +223,41 @@ export function generateReceiptHtml(bill) {
     .meta-client-box {
       display: inline-flex;
       align-items: center;
-      gap: 7px;
+      gap: 6px;
       background: #fff;
       border: 1.5px solid #000;
       border-radius: 4px;
-      padding: 1.2mm 4mm;
+      padding: 0.8mm 3.5mm;
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
     }
     .meta-client-label {
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 800;
       color: #222;
+      white-space: nowrap;
     }
     .meta-client {
-      font-size: 19px;
+      font-size: 17px;
       font-weight: 900;
       color: #000;
       text-decoration: underline;
-      text-decoration-thickness: 2.5px;
+      text-decoration-thickness: 2px;
       text-underline-offset: 3px;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
     }
     .meta-item-left {
       display: flex;
       gap: 5px;
-      align-items: baseline;
+      align-items: center;
       justify-content: flex-end;
       width: 28%;
       direction: ltr;
       text-align: left;
+      white-space: nowrap;
     }
     .meta-sno {
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 900;
       font-family: monospace;
       color: #000;
@@ -232,15 +266,15 @@ export function generateReceiptHtml(bill) {
     /* Main Two-Column Content Grid: Urdu First (RTL: Weight Breakdown on Right, Finance on Left) */
     .content-grid {
       display: flex;
-      gap: 3mm;
-      margin: 1.5mm 0;
+      gap: 2.5mm;
+      margin: 1.2mm 0;
       direction: rtl;
     }
     .weight-column {
       flex: 1.15;
       border: 1.5px solid #000;
       border-radius: 4px;
-      padding: 2.5mm 3mm;
+      padding: 1.8mm 2.5mm;
       background: #fff;
       direction: rtl;
       text-align: right;
@@ -249,18 +283,18 @@ export function generateReceiptHtml(bill) {
       flex: 1;
       border: 1.5px solid #000;
       border-radius: 4px;
-      padding: 2.5mm 3mm;
+      padding: 1.8mm 2.5mm;
       background: #fafafa;
       direction: rtl;
       text-align: right;
     }
     .section-title {
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 800;
       text-transform: uppercase;
       border-bottom: 1.5px solid #000;
-      padding-bottom: 1mm;
-      margin-bottom: 1.5mm;
+      padding-bottom: 0.8mm;
+      margin-bottom: 1mm;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -270,8 +304,8 @@ export function generateReceiptHtml(bill) {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1.5px 0;
-      font-size: 12.5px;
+      padding: 1px 0;
+      font-size: 11.5px;
       direction: rtl;
     }
     .data-row-num {
@@ -283,64 +317,64 @@ export function generateReceiptHtml(bill) {
       background: #e8e8e8;
       border: 1.5px solid #000;
       border-radius: 4px;
-      padding: 2mm 2.5mm;
-      margin-top: 2.5mm;
+      padding: 1.5mm 2.2mm;
+      margin-top: 1.5mm;
       direction: rtl;
     }
     .net-weight-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 900;
       border-bottom: 1px solid #777;
-      padding-bottom: 1mm;
+      padding-bottom: 0.8mm;
       direction: rtl;
     }
     .net-weight-manns {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 13.5px;
+      font-size: 12.5px;
       font-weight: 800;
-      margin-top: 1.5mm;
+      margin-top: 1mm;
       direction: rtl;
     }
     .net-weight-hint {
       display: flex;
       justify-content: space-between;
-      font-size: 10px;
+      font-size: 9.5px;
       color: #444;
-      margin-top: 1mm;
+      margin-top: 0.8mm;
       direction: rtl;
     }
 
     /* Financial Column */
     .total-bill-box {
       border: 2px solid #000;
-      border-radius: 5px;
-      padding: 2.5mm 2mm;
+      border-radius: 4px;
+      padding: 1.8mm 2mm;
       text-align: center;
       background: #fff;
-      margin-top: 2.5mm;
+      margin-top: 1.5mm;
       direction: ltr;
     }
     .total-bill-label {
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 900;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
     .total-amount-number {
-      font-size: 22px;
+      font-size: 21px;
       font-weight: 900;
       color: #000;
       font-family: 'Segoe UI', Tahoma, monospace;
-      margin: 1mm 0;
+      margin: 0.8mm 0;
       letter-spacing: -0.5px;
     }
     .total-bill-breakdown {
-      font-size: 10px;
+      font-size: 9.5px;
       color: #333;
       font-family: monospace;
       font-weight: 600;
@@ -349,8 +383,8 @@ export function generateReceiptHtml(bill) {
     /* Signature & Manual Notes Section: Urdu First (RTL: Signature on Right, Payment Notice on Left) */
     .signature-container {
       border-top: 1.5px solid #000;
-      padding-top: 2mm;
-      margin-top: 2mm;
+      padding-top: 1.5mm;
+      margin-top: 1.5mm;
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
@@ -362,9 +396,9 @@ export function generateReceiptHtml(bill) {
       text-align: right;
     }
     .signature-text {
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 700;
-      margin-bottom: 6mm; /* Generous vertical writing space for pencil/pen */
+      margin-bottom: 3.5mm; /* Generous yet compact vertical writing space */
     }
     .signature-underline {
       border-bottom: 1.5px dashed #444;
@@ -377,24 +411,24 @@ export function generateReceiptHtml(bill) {
       direction: ltr;
     }
     .footer-greeting {
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 800;
       color: #000;
-      line-height: 1.6;
+      line-height: 1.5;
       direction: rtl;
       text-align: left;
     }
     .footer-subtext {
-      font-size: 10px;
+      font-size: 9.5px;
       color: #444;
       font-weight: 600;
-      margin-top: 1.5px;
+      margin-top: 1px;
       text-align: left;
     }
     .footer-shop-name {
-      font-size: 9px;
+      font-size: 8.5px;
       color: #444;
-      margin-top: 2px;
+      margin-top: 1.5px;
       text-align: left;
     }
     .mann-display-badge {
@@ -402,12 +436,12 @@ export function generateReceiptHtml(bill) {
       align-items: center;
       direction: ltr;
       gap: 3px;
-      font-size: 13.5px;
+      font-size: 13px;
     }
     .num-bold {
       font-family: monospace;
       font-weight: 800;
-      font-size: 15px;
+      font-size: 14.5px;
       color: #000;
     }
     .plus-sep {
@@ -416,15 +450,17 @@ export function generateReceiptHtml(bill) {
       margin: 0 1.5px;
     }
     .software-credits-bar {
-      margin-top: 4px;
-      padding-top: 2px;
+      margin-top: 2.5px;
+      padding-top: 1.5px;
       border-top: 1px solid #000;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 9px;
+      font-size: 8.5px;
       color: #000;
       font-family: 'Segoe UI', Tahoma, sans-serif;
+      page-break-inside: avoid;
+      break-inside: avoid;
     }
     .credits-bold {
       font-weight: 900;
@@ -460,9 +496,9 @@ export function generateReceiptHtml(bill) {
 
       <!-- Right: Contacts -->
       <div class="header-right">
-        <div class="contact-row">
-          <span class="contact-name">حاجی شبیر حسین (صدر):</span>
-          <span class="contact-phone">0300-9696234</span>
+        <div class="contact-row contact-row-sadar">
+          <span class="contact-name-sadar bold"><strong>حاجی شبیر حسین (صدر):</strong></span>
+          <span class="contact-phone-sadar"><strong>0300-9696234</strong></span>
         </div>
         <div class="contact-row">
           <span class="contact-name">حاجی فقیر حسین:</span>
@@ -492,8 +528,8 @@ export function generateReceiptHtml(bill) {
         </div>
       </div>
       <div class="meta-item-left">
-        <span class="bold">تاریخ و وقت:</span>
-        <span style="font-family: monospace;">${date} ${time}</span>
+        <span class="bold" style="white-space: nowrap;">تاریخ و وقت:</span>
+        <span style="font-family: monospace; white-space: nowrap;">${date} ${time}</span>
       </div>
     </div>
 

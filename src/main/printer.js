@@ -142,7 +142,8 @@ export async function saveReceiptAsPdf(htmlContent, defaultFileName = 'Mandi_Rec
       printBackground: true,
       landscape: true,
       pageSize: 'A5',
-      margins: { marginType: 'none' }
+      margins: { marginType: 'none' },
+      pageRanges: '1'
     })
 
     await fs.promises.writeFile(filePath, pdfBuffer)
