@@ -512,3 +512,34 @@ This document logs the exact technical causes of these issues and the architectu
 3. **Receipt Preview Modal & Fallback Template** ([`src/renderer/src/components/ReceiptPreviewModal.jsx`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/components/ReceiptPreviewModal.jsx), [`src/renderer/src/components/ReceiptTemplate.jsx`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/components/ReceiptTemplate.jsx)):
    - Synchronized the bold styling on the Sadar contact entry.
 
+---
+
+## 17. Issue 13: Bill Width Exceeding A4 Portrait Width & Forced Landscape Printing
+
+### Symptoms Observed
+- The bill was printing strictly in **Landscape** orientation on physical printers regardless of user selection.
+- Because the previous template was configured for A5 Landscape with a width exceeding standard A4 portrait printable margins (`200mm` / `7.87in` plus margins), Chromium's print subsystem auto-enforced Landscape orientation, preventing clean Portrait printing on A4 sheets.
+
+### Technical Root Cause
+1. `@page { size: A5 landscape; }` in `receiptTemplate.js` explicitly informed Chromium to force Landscape layout.
+2. In `src/main/printer.js`, both `printReceiptSilently` and `saveReceiptAsPdf` had hardcoded `landscape: true` and `pageSize: 'A5'`.
+3. Total voucher container width was set to `200mm` (~7.87 inches). When combined with hardware non-printable page margins on consumer desktop printers (typically 0.25in to 0.5in on each side), the total required width exceeded the physical printable width of portrait A4 paper (8.27in - 1in = ~7.27in), causing driver auto-rotation into Landscape.
+
+### Solutions Implemented
+1. **Configured 7-Inch Portrait Width**:
+   - In [`src/renderer/src/utils/receiptTemplate.js`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/utils/receiptTemplate.js), set `.voucher-card` width strictly to `7in` (`width: 7in; max-width: 7in; min-width: 7in; margin: 0 auto;`).
+   - 7 inches (`177.8mm`) fits comfortably inside standard A4 portrait paper (`210mm` / `8.27in`), leaving ~0.63in of clean margin on both sides.
+2. **Updated Print Orientation to Portrait**:
+   - In [`src/renderer/src/utils/receiptTemplate.js`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/utils/receiptTemplate.js), changed `@page` rule from `size: A5 landscape;` to:
+     ```css
+     @page {
+       size: portrait;
+       margin: 5mm 0;
+     }
+     ```
+   - In [`src/main/printer.js`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/main/printer.js), changed `landscape: true` to `landscape: false` and `pageSize: 'A5'` to `pageSize: 'A4'` across `printReceiptSilently` and `saveReceiptAsPdf`.
+3. **Synchronized Preview Modal & Templates**:
+   - Updated [`src/renderer/src/components/ReceiptPreviewModal.jsx`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/components/ReceiptPreviewModal.jsx) preview card to `w-[7in]` and updated subtitle indicator to `7-Inch Portrait Format (Optimized for A4 Portrait Paper)`.
+   - Updated [`src/renderer/src/components/ReceiptTemplate.jsx`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/components/ReceiptTemplate.jsx) container to `w-[7in] max-w-[7in] mx-auto`.
+
+

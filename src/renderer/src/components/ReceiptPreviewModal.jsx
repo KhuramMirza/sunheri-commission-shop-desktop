@@ -109,7 +109,7 @@ export default function ReceiptPreviewModal({ bill, isOpen, onClose, onPrint }) 
                   Bill #{serialNo}
                 </span>
               </h3>
-              <p className="text-xs text-slate-400">A5 Landscape / Half A4 Format (210mm × 148.5mm)</p>
+              <p className="text-xs text-slate-400">7-Inch Portrait Format (Optimized for A4 Portrait Paper)</p>
             </div>
           </div>
           <button
@@ -122,7 +122,7 @@ export default function ReceiptPreviewModal({ bill, isOpen, onClose, onPrint }) 
 
         {/* Paper Container - Realistic Voucher Display */}
         <div className="flex-1 overflow-y-auto p-4 md:p-6 flex justify-center bg-slate-950/80">
-          <div className="bg-white text-black p-5 md:p-6 rounded-lg shadow-2xl w-[760px] max-w-full font-sans text-xs leading-normal border-2 border-black flex flex-col gap-3 select-text">
+          <div className="bg-white text-black p-4 md:p-5 rounded-lg shadow-2xl w-[7in] max-w-full font-sans text-xs leading-normal border-2 border-black flex flex-col gap-2.5 select-text">
             {/* Header Section: 3-column horizontal distribution */}
             <div className="flex justify-between items-center pb-3 border-b-2 border-black gap-3">
               {/* Left: English Branding & Location */}

@@ -20,7 +20,7 @@ export async function getSystemPrinters() {
 }
 
 /**
- * Print A5 landscape receipt using Electron BrowserWindow
+ * Print portrait receipt using Electron BrowserWindow
  * @param {string} htmlContent - Complete HTML receipt template string
  * @param {object} options - Optional printer configuration
  */
@@ -69,8 +69,8 @@ export async function printReceiptSilently(htmlContent, options = {}) {
         {
           silent: isSilent,
           printBackground: true,
-          landscape: true,
-          pageSize: 'A5',
+          landscape: false,
+          pageSize: 'A4',
           deviceName: printerName,
           margins: {
             marginType: 'none'
@@ -106,7 +106,7 @@ export async function printReceiptSilently(htmlContent, options = {}) {
 }
 
 /**
- * Save A5 landscape receipt as a PDF file
+ * Save portrait receipt as a PDF file
  * @param {string} htmlContent - Complete HTML receipt template string
  * @param {string} defaultFileName - Default filename for save dialog
  */
@@ -137,11 +137,11 @@ export async function saveReceiptAsPdf(htmlContent, defaultFileName = 'Mandi_Rec
     const encodedHtml = encodeURIComponent(htmlContent)
     await pdfWindow.loadURL(`data:text/html;charset=utf-8,${encodedHtml}`)
 
-    // Generate PDF in A5 Landscape orientation (210mm x 148.5mm)
+    // Generate PDF in A4 Portrait orientation (7in width voucher)
     const pdfBuffer = await pdfWindow.webContents.printToPDF({
       printBackground: true,
-      landscape: true,
-      pageSize: 'A5',
+      landscape: false,
+      pageSize: 'A4',
       margins: { marginType: 'none' },
       pageRanges: '1'
     })

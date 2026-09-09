@@ -2,7 +2,7 @@ import { MANDI_LOGO_BASE64 } from '../assets/mandiLogoBase64.js'
 
 /**
  * Generates an optimized, self-contained HTML receipt template
- * specifically formatted for A5 Landscape (Half of standard A4, horizontal: 210mm x 148.5mm).
+ * specifically formatted for 7-inch width in Portrait orientation (fitted for standard A4 Portrait paper).
  * Engineered for high-contrast legibility, no hollow vertical gaps, and proper Urdu typography.
  * @param {object} bill - Bill record containing all transaction & calculated fields
  * @returns {string} Fully self-contained HTML document string
@@ -36,8 +36,8 @@ export function generateReceiptHtml(bill) {
   <title>Receipt #${serialNo} - Soneri Commission Shop</title>
   <style>
     @page {
-      size: A5 landscape;
-      margin: 3mm 5mm;
+      size: portrait;
+      margin: 5mm 0;
     }
     * {
       box-sizing: border-box;
@@ -46,14 +46,15 @@ export function generateReceiptHtml(bill) {
     }
     html, body {
       width: 100%;
-      max-width: 200mm;
-      max-height: 142mm;
       margin: 0 auto;
       padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
       overflow: hidden;
       font-family: 'Segoe UI', Tahoma, -apple-system, BlinkMacSystemFont, 'Noto Nastaliq Urdu', 'Noto Sans Arabic', sans-serif;
-      font-size: 12px;
-      line-height: 1.28;
+      font-size: 11.5px;
+      line-height: 1.25;
       color: #000;
       background: #fff;
       -webkit-print-color-adjust: exact;
@@ -70,12 +71,17 @@ export function generateReceiptHtml(bill) {
     .text-left { text-align: left; }
     .bold { font-weight: bold; }
 
-    /* Outer Voucher Card */
+    /* Outer Voucher Card - Strictly 7 Inches Wide for Portrait on A4 Paper */
     .voucher-card {
+      width: 7in;
+      max-width: 7in;
+      min-width: 7in;
+      box-sizing: border-box;
       border: 2px solid #000;
       border-radius: 5px;
-      padding: 2mm 3.5mm;
+      padding: 2.5mm 3.5mm;
       background: #fff;
+      margin: 0 auto;
       page-break-inside: avoid;
       break-inside: avoid;
       page-break-after: avoid;

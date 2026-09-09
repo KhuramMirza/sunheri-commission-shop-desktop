@@ -24,7 +24,7 @@ export default function ReceiptTemplate({ bill }) {
   return (
     <div
       id="receipt-print-container"
-      className="hidden print:block w-[210mm] max-w-[210mm] h-[148.5mm] p-4 bg-white text-black font-sans text-xs leading-normal select-text"
+      className="hidden print:block w-[7in] max-w-[7in] mx-auto p-3.5 bg-white text-black font-sans text-xs leading-normal select-text"
       style={{ display: 'none' }}
     >
       {/* Header */}
