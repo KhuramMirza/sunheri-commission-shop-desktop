@@ -208,14 +208,16 @@ export function generateReceiptHtml(bill) {
       border-radius: 4px;
       padding: 1.2mm 2.5mm;
       margin: 1.5mm 0;
-      font-size: 12px;
+      font-size: 11.5px;
       direction: rtl;
+      box-sizing: border-box;
+      overflow: hidden;
     }
     .meta-item-right {
       display: flex;
-      gap: 5px;
+      gap: 4px;
       align-items: center;
-      width: 25%;
+      flex-shrink: 0;
       text-align: right;
       white-space: nowrap;
     }
@@ -223,27 +225,32 @@ export function generateReceiptHtml(bill) {
       display: flex;
       align-items: center;
       justify-content: center;
-      flex: 1;
+      flex: 1 1 auto;
+      min-width: 0;
+      padding: 0 4px;
       text-align: center;
     }
     .meta-client-box {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       background: #fff;
       border: 1.5px solid #000;
       border-radius: 4px;
-      padding: 0.8mm 3.5mm;
+      padding: 0.6mm 3mm;
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+      max-width: 100%;
+      box-sizing: border-box;
     }
     .meta-client-label {
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 800;
       color: #222;
       white-space: nowrap;
+      flex-shrink: 0;
     }
     .meta-client {
-      font-size: 17px;
+      font-size: 15.5px;
       font-weight: 900;
       color: #000;
       text-decoration: underline;
@@ -251,19 +258,40 @@ export function generateReceiptHtml(bill) {
       text-underline-offset: 3px;
       letter-spacing: 0.3px;
       white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .meta-item-left {
       display: flex;
-      gap: 5px;
-      align-items: center;
-      justify-content: flex-end;
-      width: 28%;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      flex-shrink: 0;
       direction: ltr;
       text-align: left;
+      font-size: 10px;
+      line-height: 1.25;
       white-space: nowrap;
     }
+    .meta-dt-row {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .meta-dt-label {
+      font-weight: 800;
+      color: #111;
+      font-size: 10px;
+    }
+    .meta-dt-val {
+      font-family: 'Segoe UI', Tahoma, monospace;
+      font-weight: 700;
+      font-size: 10.5px;
+      color: #000;
+      direction: ltr;
+    }
     .meta-sno {
-      font-size: 13.5px;
+      font-size: 13px;
       font-weight: 900;
       font-family: monospace;
       color: #000;
@@ -534,8 +562,14 @@ export function generateReceiptHtml(bill) {
         </div>
       </div>
       <div class="meta-item-left">
-        <span class="bold" style="white-space: nowrap;">تاریخ و وقت:</span>
-        <span style="font-family: monospace; white-space: nowrap;">${date} ${time}</span>
+        <div class="meta-dt-row">
+          <span class="meta-dt-label bold">تاریخ:</span>
+          <span class="meta-dt-val">${date}</span>
+        </div>
+        <div class="meta-dt-row">
+          <span class="meta-dt-label bold">وقت:</span>
+          <span class="meta-dt-val">${time}</span>
+        </div>
       </div>
     </div>
 

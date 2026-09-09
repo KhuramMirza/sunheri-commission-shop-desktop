@@ -47,15 +47,20 @@ export default function ReceiptTemplate({ bill }) {
       </div>
 
       {/* Meta Bar: Person the bill belongs to in the CENTER */}
-      <div className="flex justify-between items-center bg-gray-100 border border-black rounded px-3 py-1 my-2 text-xs font-bold" style={{ direction: 'rtl' }}>
-        <span className="w-1/4 text-right">بل نمبر (S.No): #{serialNo}</span>
-        <div className="flex-1 text-center flex items-center justify-center">
-          <div className="inline-flex items-center gap-2 px-3 py-0.5 bg-white border-2 border-black rounded">
-            <span className="text-xs font-bold text-gray-800">گاہک / زمیندار (Client):</span>
-            <span className="text-lg font-black text-black underline decoration-2 underline-offset-4 tracking-wide">{clientName}</span>
+      <div className="flex justify-between items-center bg-gray-100 border border-black rounded px-3 py-1 my-2 text-xs font-bold overflow-hidden" style={{ direction: 'rtl' }}>
+        <span className="flex-shrink-0 text-right">بل نمبر (S.No): #{serialNo}</span>
+        <div className="flex-1 text-center flex items-center justify-center min-w-0 px-2">
+          <div className="inline-flex items-center gap-2 px-3 py-0.5 bg-white border-2 border-black rounded max-w-full">
+            <span className="text-xs font-bold text-gray-800 flex-shrink-0">گاہک / زمیندار (Client):</span>
+            <span className="text-base font-black text-black underline decoration-2 underline-offset-4 tracking-wide truncate">{clientName}</span>
           </div>
         </div>
-        <span className="w-1/4 text-left" style={{ direction: 'ltr' }}>تاریخ: {date}</span>
+        <div className="text-left flex flex-col justify-center items-start text-[10px] leading-tight flex-shrink-0" style={{ direction: 'ltr' }}>
+          <div className="flex items-center gap-1">
+            <span>تاریخ:</span>
+            <span className="font-mono">{date}</span>
+          </div>
+        </div>
       </div>
 
       {/* Content: Urdu First (Right: Weights, Left: Financials) */}

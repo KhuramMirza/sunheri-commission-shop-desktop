@@ -180,24 +180,28 @@ export default function ReceiptPreviewModal({ bill, isOpen, onClose, onPrint }) 
             </div>
 
             {/* Meta Bar: Person the bill belongs to in the CENTER */}
-            <div className="flex justify-between items-center bg-slate-100 border border-black rounded px-3 py-1.5 text-xs font-semibold" style={{ direction: 'rtl' }}>
-              <div className="w-1/4 text-right">
+            <div className="flex justify-between items-center bg-slate-100 border border-black rounded px-3 py-1.5 text-xs font-semibold overflow-hidden" style={{ direction: 'rtl' }}>
+              <div className="flex-shrink-0 text-right">
                 <span className="font-bold">بل نمبر (S.No):</span>
                 <span className="font-black mr-1.5 text-sm text-slate-950 font-mono">#{serialNo}</span>
               </div>
-              <div className="flex-1 text-center flex items-center justify-center">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-md bg-white border-2 border-black shadow-sm">
-                  <span className="text-xs font-bold text-slate-800">گاہک / زمیندار (Client):</span>
-                  <span className="font-black text-lg md:text-xl text-black underline decoration-black decoration-2 underline-offset-4 tracking-wide">
+              <div className="flex-1 text-center flex items-center justify-center min-w-0 px-2">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-white border-2 border-black shadow-sm max-w-full">
+                  <span className="text-xs font-bold text-slate-800 flex-shrink-0">گاہک / زمیندار (Client):</span>
+                  <span className="font-black text-base md:text-lg text-black underline decoration-black decoration-2 underline-offset-4 tracking-wide truncate">
                     {clientName}
                   </span>
                 </div>
               </div>
-              <div className="w-1/4 text-left" style={{ direction: 'ltr' }}>
-                <span className="font-bold">تاریخ و وقت:</span>
-                <span className="ml-1.5 font-mono text-[11px]">
-                  {date} {time}
-                </span>
+              <div className="text-left flex flex-col justify-center items-start text-[10.5px] leading-tight flex-shrink-0" style={{ direction: 'ltr' }}>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-bold text-slate-900">تاریخ:</span>
+                  <span className="font-mono text-slate-900 font-bold">{date}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-bold text-slate-900">وقت:</span>
+                  <span className="font-mono text-slate-900 font-bold">{time}</span>
+                </div>
               </div>
             </div>
 

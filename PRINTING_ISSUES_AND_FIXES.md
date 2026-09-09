@@ -542,4 +542,41 @@ This document logs the exact technical causes of these issues and the architectu
    - Updated [`src/renderer/src/components/ReceiptPreviewModal.jsx`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/components/ReceiptPreviewModal.jsx) preview card to `w-[7in]` and updated subtitle indicator to `7-Inch Portrait Format (Optimized for A4 Portrait Paper)`.
    - Updated [`src/renderer/src/components/ReceiptTemplate.jsx`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/components/ReceiptTemplate.jsx) container to `w-[7in] max-w-[7in] mx-auto`.
 
+---
+
+## 18. Issue 14: Tareekh & Waqt Overflow Past Left Boundary in 7-Inch Portrait Layout
+
+### Symptoms Observed
+- In portrait orientation at 7-inch width, the date and time label (**تاریخ و وقت**) on the left side spilled out past the left border of the bill voucher card.
+
+### Technical Root Cause
+- In `.meta-bar` (which has `direction: rtl`), `.meta-item-left` contained `تاریخ و وقت:` plus the full date and time string on a single unbroken line (`تاریخ و وقت: 2026-09-09 08:15 PM`).
+- The single-line text required ~240px of horizontal width.
+- In a 7-inch card with S.No (~110px) on the right and the client box (~300px) in the center, only ~160px–180px was available for the left element.
+- Because `.meta-item-left` was styled with `width: 28%` and `white-space: nowrap;`, the excess ~60px overflowed past the left edge of `.meta-bar` and through the outer card border.
+
+### Solutions Implemented
+1. **Stacked Date & Time Layout**:
+   - Split Date and Time into two compact, vertically stacked rows:
+     ```html
+     <div class="meta-item-left">
+       <div class="meta-dt-row">
+         <span class="meta-dt-label bold">تاریخ:</span>
+         <span class="meta-dt-val">${date}</span>
+       </div>
+       <div class="meta-dt-row">
+         <span class="meta-dt-label bold">وقت:</span>
+         <span class="meta-dt-val">${time}</span>
+       </div>
+     </div>
+     ```
+   - Reduced horizontal width from ~240px down to **~105px**, eliminating horizontal crowding completely.
+2. **Constrained Flexbox Boundaries**:
+   - Added `overflow: hidden;` and `box-sizing: border-box;` to `.meta-bar`.
+   - Set `.meta-item-left` with `flex-shrink: 0; align-items: flex-start; text-align: left; direction: ltr;`.
+   - Set `.meta-item-center` with `flex: 1 1 auto; min-width: 0;` so long client names truncate cleanly rather than pushing adjacent elements outside the card boundaries.
+3. **Synchronized Preview Modal & Templates**:
+   - Applied matching stacked layout in [`src/renderer/src/components/ReceiptPreviewModal.jsx`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/components/ReceiptPreviewModal.jsx) and [`src/renderer/src/components/ReceiptTemplate.jsx`](file:///d:/client_projects/sunheri-commission-shop-desktop/src/renderer/src/components/ReceiptTemplate.jsx).
+
+
 
