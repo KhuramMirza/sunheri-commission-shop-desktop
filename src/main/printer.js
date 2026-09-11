@@ -15,7 +15,9 @@ export async function getSystemPrinters() {
   } finally {
     if (win && !win.isDestroyed()) {
       win.close()
+      win.destroy()
     }
+    win = null
   }
 }
 
@@ -48,24 +50,25 @@ export async function printReceiptSilently(htmlContent, options = {}) {
 
     // IMPORTANT: On Windows, to show a system print dialog, the window must be visible (show: true).
     // If silent printing to a physical printer, keep it completely hidden (show: false).
-    printWindow = new BrowserWindow({
+    let hiddenWin = new BrowserWindow({
       show: !isSilent,
       width: 850,
       height: 650,
       title: 'Print Receipt - Soneri Commission Shop',
       autoHideMenuBar: true,
       webPreferences: {
+        backgroundThrottling: false,
         nodeIntegration: false,
         contextIsolation: true,
         sandbox: true
       }
     })
 
-    const encodedHtml = encodeURIComponent(htmlContent)
-    await printWindow.loadURL(`data:text/html;charset=utf-8,${encodedHtml}`)
+    const encodedHtml = encodeURIComponent(htmlContent || '')
+    await hiddenWin.loadURL(`data:text/html;charset=utf-8,${encodedHtml}`)
 
     return new Promise((resolve) => {
-      printWindow.webContents.print(
+      hiddenWin.webContents.print(
         {
           silent: isSilent,
           printBackground: true,
@@ -80,13 +83,13 @@ export async function printReceiptSilently(htmlContent, options = {}) {
         (success, failureReason) => {
           console.log(`Print job dispatched: success=${success}, reason=${failureReason}`)
 
-          // Keep window open briefly for spooler dispatch before closing
-          setTimeout(() => {
-            if (printWindow && !printWindow.isDestroyed()) {
-              printWindow.close()
-              printWindow = null
-            }
-          }, isSilent ? 1000 : 300)
+          // Regardless of whether success is true or false, you MUST call hiddenWin.close() or hiddenWin.destroy()
+          // inside that callback to free up system memory and avoid memory leaks.
+          if (hiddenWin && !hiddenWin.isDestroyed()) {
+            hiddenWin.close()
+            hiddenWin.destroy()
+          }
+          hiddenWin = null
 
           if (!success) {
             resolve({ success: false, error: failureReason, printerName })
@@ -98,9 +101,11 @@ export async function printReceiptSilently(htmlContent, options = {}) {
     })
   } catch (err) {
     console.error('Error in printReceiptSilently:', err)
-    if (printWindow && !printWindow.isDestroyed()) {
-      printWindow.close()
+    if (hiddenWin && !hiddenWin.isDestroyed()) {
+      hiddenWin.close()
+      hiddenWin.destroy()
     }
+    hiddenWin = null
     return { success: false, error: err.message }
   }
 }
@@ -154,6 +159,8 @@ export async function saveReceiptAsPdf(htmlContent, defaultFileName = 'Mandi_Rec
   } finally {
     if (pdfWindow && !pdfWindow.isDestroyed()) {
       pdfWindow.close()
+      pdfWindow.destroy()
     }
+    pdfWindow = null
   }
 }
