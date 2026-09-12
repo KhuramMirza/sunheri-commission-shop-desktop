@@ -27,7 +27,7 @@ export async function getSystemPrinters() {
  * @param {object} options - Optional printer configuration
  */
 export async function printReceiptSilently(htmlContent, options = {}) {
-  let printWindow = null
+  let hiddenWin = null
 
   try {
     // Check available printers to find default
@@ -50,7 +50,7 @@ export async function printReceiptSilently(htmlContent, options = {}) {
 
     // IMPORTANT: On Windows, to show a system print dialog, the window must be visible (show: true).
     // If silent printing to a physical printer, keep it completely hidden (show: false).
-    let hiddenWin = new BrowserWindow({
+    hiddenWin = new BrowserWindow({
       show: !isSilent,
       width: 850,
       height: 650,

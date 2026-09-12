@@ -115,13 +115,17 @@ export default function App() {
     const totalManns = Math.floor(netWeight / 40)
     const remainingKgs = Math.round((netWeight % 40) * 100) / 100
     const ratePerKg = rate > 0 ? rate / 40 : 0
-    const totalBill = (totalManns * rate) + (remainingKgs * ratePerKg)
+    const grossBill = (totalManns * rate) + (remainingKgs * ratePerKg)
+    const masjidFund = grossBill > 0 ? 200 : 0
+    const totalBill = Math.max(0, grossBill - masjidFund)
 
     return {
       netWeight,
       totalManns,
       remainingKgs,
       ratePerKg,
+      grossBill,
+      masjidFund,
       totalBill
     }
   }, [formData.saafiWeight, formData.bardanaWeight, formData.kandaWeight, formData.ratePerMann])
@@ -131,7 +135,7 @@ export default function App() {
     const billPreview = {
       serialNo: parseInt(formData.serialNo, 10) || 1,
       date: formData.date || getTodayDateString(),
-      clientName: formData.clientName ? formData.clientName.trim() : 'Cash Client (نقد گاہک)',
+      clientName: formData.clientName ? formData.clientName.trim() : 'نقد گاہک',
       saafiWeight: parseFloat(formData.saafiWeight) || 0,
       bardanaWeight: parseFloat(formData.bardanaWeight) || 0,
       kandaWeight: parseFloat(formData.kandaWeight) || 0,
@@ -140,6 +144,8 @@ export default function App() {
       remainingKgs: calculations.remainingKgs,
       ratePerMann: parseFloat(formData.ratePerMann) || 0,
       ratePerKg: calculations.ratePerKg,
+      grossBill: calculations.grossBill,
+      masjidFund: calculations.masjidFund,
       totalBill: calculations.totalBill
     }
 
@@ -197,7 +203,7 @@ export default function App() {
     const billRecord = {
       serialNo: parseInt(formData.serialNo, 10) || 1,
       date: formData.date || getTodayDateString(),
-      clientName: formData.clientName ? formData.clientName.trim() : 'Cash Client (نقد گاہک)',
+      clientName: formData.clientName ? formData.clientName.trim() : 'نقد گاہک',
       saafiWeight: parseFloat(formData.saafiWeight) || 0,
       bardanaWeight: parseFloat(formData.bardanaWeight) || 0,
       kandaWeight: parseFloat(formData.kandaWeight) || 0,
@@ -206,6 +212,8 @@ export default function App() {
       remainingKgs: calculations.remainingKgs,
       ratePerMann: parseFloat(formData.ratePerMann) || 0,
       ratePerKg: calculations.ratePerKg,
+      grossBill: calculations.grossBill,
+      masjidFund: calculations.masjidFund,
       totalBill: calculations.totalBill
     }
 

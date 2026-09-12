@@ -260,9 +260,9 @@ export default function BillForm({
               <span className="font-bold flex items-center gap-1.5">
                 <TrendingUp className="w-4 h-4 text-amber-400" /> Total Bill
               </span>
-              <span className="font-urdu font-bold text-amber-300 text-xs">کل رقم</span>
+              <span className="font-urdu font-bold text-amber-300 text-xs">صافی رقم (بعد از مسجد فنڈ)</span>
             </div>
-            <div className="my-1.5">
+            <div className="my-1">
               <div className="text-xl sm:text-2xl lg:text-3xl font-black font-mono text-emerald-400 tracking-tight">
                 <span className="text-xs text-slate-300 font-bold mr-1">Rs.</span>
                 {calculations.totalBill.toLocaleString('en-US', {
@@ -271,8 +271,13 @@ export default function BillForm({
                 })}
               </div>
             </div>
-            <div className="text-[11px] text-amber-200/80 font-mono truncate font-medium">
-              {calculations.totalManns}M {calculations.remainingKgs}Kg @ Rs.{formData.ratePerMann || 0}
+            <div className="text-[11px] text-amber-200/90 font-mono flex items-center justify-between pt-1 border-t border-amber-500/20">
+              <span className="text-slate-300">
+                کل: Rs.{Math.round(calculations.grossBill || calculations.totalBill).toLocaleString()}
+              </span>
+              <span className="text-rose-300 font-bold font-urdu">
+                مسجد فنڈ: -{calculations.masjidFund || 0}
+              </span>
             </div>
           </div>
         </div>

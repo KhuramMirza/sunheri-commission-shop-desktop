@@ -215,7 +215,7 @@ export default function LedgerTable({
                     {t.date}
                   </td>
                   <td className="py-2.5 px-3.5 font-black text-amber-200 font-sans text-xs md:text-sm">
-                    {t.clientName || 'Cash Client'}
+                    {t.clientName || 'نقد گاہک'}
                   </td>
                   <td className="py-2.5 px-3.5 text-right font-medium">
                     {Number(t.saafiWeight).toFixed(1)}
@@ -239,11 +239,18 @@ export default function LedgerTable({
                     Rs. {Number(t.ratePerMann || 0).toLocaleString()}
                   </td>
                   <td className="py-2.5 px-3.5 text-right font-black text-emerald-400 whitespace-nowrap text-sm">
-                    Rs.{' '}
-                    {Number(t.totalBill || 0).toLocaleString('en-US', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2
-                    })}
+                    <div>
+                      Rs.{' '}
+                      {Number(t.totalBill || 0).toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      })}
+                    </div>
+                    {t.masjidFund ? (
+                      <div className="text-[10px] text-rose-300 font-urdu font-normal">
+                        مسجد فنڈ: -{Number(t.masjidFund).toLocaleString()}
+                      </div>
+                    ) : null}
                   </td>
                   <td className="py-2.5 px-3.5 text-center">
                     <div className="flex items-center justify-center gap-2">

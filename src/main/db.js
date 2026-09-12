@@ -42,7 +42,7 @@ export const dbService = {
       const record = {
         serialNo: parseInt(billData.serialNo, 10) || 1,
         date: billData.date || new Date().toISOString().split('T')[0],
-        clientName: billData.clientName ? billData.clientName.trim() : 'Cash Client (نقد گاہک)',
+        clientName: billData.clientName ? billData.clientName.trim() : 'نقد گاہک',
         saafiWeight: parseFloat(billData.saafiWeight) || 0,
         bardanaWeight: parseFloat(billData.bardanaWeight) || 0,
         kandaWeight: parseFloat(billData.kandaWeight) || 0,
@@ -51,6 +51,14 @@ export const dbService = {
         remainingKgs: parseFloat(billData.remainingKgs) || 0,
         ratePerMann: parseFloat(billData.ratePerMann) || 0,
         ratePerKg: parseFloat(billData.ratePerKg) || 0,
+        grossBill:
+          billData.grossBill !== undefined
+            ? parseFloat(billData.grossBill)
+            : parseFloat(billData.totalBill) || 0,
+        masjidFund:
+          billData.masjidFund !== undefined
+            ? parseFloat(billData.masjidFund)
+            : (parseFloat(billData.grossBill || billData.totalBill) > 0 ? 200 : 0),
         totalBill: parseFloat(billData.totalBill) || 0,
         createdAt: new Date().toISOString()
       }
