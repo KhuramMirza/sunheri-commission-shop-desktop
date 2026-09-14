@@ -318,6 +318,7 @@ export function generateReceiptHtml(bill) {
       text-underline-offset: 4px;
       letter-spacing: 0.3px;
       flex: 1;
+      text-align: center;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -464,9 +465,9 @@ export function generateReceiptHtml(bill) {
     }
     .total-bill-breakdown {
       font-size: 10px;
-      color: #222;
+      color: #000;
       font-family: 'Segoe UI', Tahoma, monospace;
-      font-weight: 700;
+      font-weight: 800;
       direction: ltr;
     }
 
@@ -593,6 +594,7 @@ export function generateReceiptHtml(bill) {
     <div class="client-name-bar">
       <span class="client-label">نام:</span>
       <span class="client-name">${clientName}</span>
+      <span class="client-label" style="visibility: hidden;" aria-hidden="true">نام:</span>
     </div>
 
     <!-- Main Content Columns (Right: Weights, Left: Financials & Masjid Fund) -->
@@ -662,9 +664,9 @@ export function generateReceiptHtml(bill) {
             <span>کل رقم (گروس):</span>
             <span class="data-row-num bold">روپیہ ${grossBill}</span>
           </div>
-          <div class="data-row" style="color: #b91c1c; font-weight: 800;">
+          <div class="data-row" style="color: #000; font-weight: 900;">
             <span>مسجد فنڈ کٹوتی:</span>
-            <span class="data-row-num bold" style="color: #b91c1c;">-${masjidFund} روپیہ</span>
+            <span class="data-row-num bold" style="color: #000;">-${masjidFund} روپیہ</span>
           </div>
         </div>
 

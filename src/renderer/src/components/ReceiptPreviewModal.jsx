@@ -224,12 +224,13 @@ export default function ReceiptPreviewModal({ bill, isOpen, onClose }) {
               </div>
             </div>
 
-            {/* Customer Name Bar: Prominent and pure Urdu */}
-            <div className="flex items-center bg-slate-100 border border-black rounded px-3.5 py-1.5 text-xs font-semibold gap-2" style={{ direction: 'rtl' }}>
+            {/* Customer Name Bar: Prominent, pure Urdu & centered */}
+            <div className="flex items-center justify-between bg-slate-100 border border-black rounded px-3.5 py-1.5 text-xs font-semibold gap-2" style={{ direction: 'rtl' }}>
               <span className="font-black text-sm text-slate-950 font-urdu flex-shrink-0">نام:</span>
-              <span className="font-black text-base md:text-lg text-black underline decoration-black decoration-2 underline-offset-4 tracking-wide truncate font-urdu flex-1 text-right">
+              <span className="font-black text-base md:text-lg text-black underline decoration-black decoration-2 underline-offset-4 tracking-wide truncate font-urdu flex-1 text-center">
                 {clientName}
               </span>
+              <span className="font-black text-sm font-urdu flex-shrink-0 invisible select-none" aria-hidden="true">نام:</span>
             </div>
 
             {/* Main Content: Wide 2-Column Layout (Right: Weights, Left: Financials & Masjid Fund) */}
@@ -300,7 +301,7 @@ export default function ReceiptPreviewModal({ bill, isOpen, onClose }) {
                       <span className="font-urdu">کل رقم (گروس):</span>
                       <span className="font-mono text-sm font-black" style={{ direction: 'ltr' }}>روپیہ {grossBill}</span>
                     </div>
-                    <div className="flex justify-between items-center text-rose-700 font-black">
+                    <div className="flex justify-between items-center text-black font-black">
                       <span className="font-urdu">مسجد فنڈ کٹوتی:</span>
                       <span className="font-mono text-sm font-black" style={{ direction: 'ltr' }}>-{masjidFund} روپیہ</span>
                     </div>
@@ -315,7 +316,7 @@ export default function ReceiptPreviewModal({ bill, isOpen, onClose }) {
                   <div className="font-black text-2xl text-slate-950 font-mono mt-0.5" style={{ direction: 'ltr' }}>
                     Rs. {totalBill}
                   </div>
-                  <div className="text-[10px] text-slate-700 font-urdu font-bold mt-1">
+                  <div className="text-[10px] text-slate-950 font-urdu font-bold mt-1">
                     {totalManns} من + {remainingKgs} کلو @ روپیہ {ratePerMann} (-{masjidFund})
                   </div>
                 </div>

@@ -112,12 +112,13 @@ export default function ReceiptTemplate({ bill }) {
         </div>
       </div>
 
-      {/* Customer Name Row (Pure Urdu) */}
-      <div className="flex items-center bg-gray-100 border border-black rounded px-3 py-1 my-2 text-xs font-bold gap-2" style={{ direction: 'rtl' }}>
+      {/* Customer Name Row (Pure Urdu & Centered) */}
+      <div className="flex items-center justify-between bg-gray-100 border border-black rounded px-3 py-1 my-2 text-xs font-bold gap-2" style={{ direction: 'rtl' }}>
         <span className="font-urdu font-black text-sm flex-shrink-0">نام:</span>
-        <span className="text-base font-black text-black underline decoration-2 underline-offset-4 tracking-wide truncate font-urdu flex-1 text-right">
+        <span className="text-base font-black text-black underline decoration-2 underline-offset-4 tracking-wide truncate font-urdu flex-1 text-center">
           {clientName}
         </span>
+        <span className="font-urdu font-black text-sm flex-shrink-0 invisible select-none" aria-hidden="true">نام:</span>
       </div>
 
       {/* Main Content Columns: Right: Weights, Left: Financials & Masjid Fund */}
@@ -177,7 +178,7 @@ export default function ReceiptTemplate({ bill }) {
               <span className="font-urdu">کل رقم (گروس):</span>
               <span style={{ direction: 'ltr' }}>روپیہ {grossBill}</span>
             </div>
-            <div className="flex justify-between text-xs py-0.5 text-red-700 font-bold">
+            <div className="flex justify-between text-xs py-0.5 text-black font-black">
               <span className="font-urdu">مسجد فنڈ کٹوتی:</span>
               <span style={{ direction: 'ltr' }}>-{masjidFund} روپیہ</span>
             </div>
